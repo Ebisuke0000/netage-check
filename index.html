@@ -1,0 +1,2203 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ネット年齢チェック｜ネットミーム50本で、あなたのネット歴は何年相当？</title>
+<meta name="description" content="1999年から2026年のネットミーム50本を「知らない／知ってる／使ってた」で押すだけ。あなたのネット年齢（ネット歴◯年相当）をドン！と判定。無料・登録なし・3分。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ネット年齢チェック">
+<meta property="og:description" content="ネットミーム50本を押すだけで、ネット歴◯年相当を判定。無料・登録なし・3分。">
+<meta property="og:image" content="素材/card.png">
+<meta property="og:site_name" content="ネット年齢チェック">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ネット年齢チェック">
+<meta name="twitter:description" content="ネットミーム50本を押すだけで、ネット歴◯年相当を判定。無料・登録なし・3分。">
+<meta name="twitter:image" content="素材/card.png">
+<link rel="icon" href="素材/logo_clear.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=RocknRoll+One&family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
+<style>
+/* Layout: one column. Header, progress card, sticky era tabs, one era at a time as a ranked list
+   with 3-way answer buttons and an expandable detail panel. A fixed bottom bar leads to the
+   full-screen result card (screenshot-sized), whose effects scale with the score tier. */
+:root {
+  --bg: #EEF1F4;
+  --surface: #FFFFFF;
+  --surface2: #E1E6EC;
+  --fg: #141A22;
+  --muted: #5B6672;
+  --line: #C9D1DA;
+  --era: #2A66C4;
+  --era-fg: #FFFFFF;
+  --era-soft: #D9E4F5;
+  --ok: #1E7A4C;
+  --dead: #8A5A1F;
+  --gold: #C9962B;
+  --gold2: #F3D77A;
+  --f-display: 'RocknRoll One', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --f-body: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  --f-dot: 'DotGothic16', 'MS Gothic', monospace;
+  --f-aa: 'MS PGothic', 'Saitamaar', 'IPAMonaPGothic', 'Mona', 'Hiragino Kaku Gothic ProN', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161C; --surface: #1A2129; --surface2: #242D37; --fg: #E8ECF1; --muted: #9AA7B5;
+    --line: #2F3A46; --era-fg: #0E1319; --ok: #6FD39A; --dead: #E0B06A; --gold: #E2B64A; --gold2: #FFE9A3;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161C; --surface: #1A2129; --surface2: #242D37; --fg: #E8ECF1; --muted: #9AA7B5;
+  --line: #2F3A46; --era-fg: #0E1319; --ok: #6FD39A; --dead: #E0B06A; --gold: #E2B64A; --gold2: #FFE9A3;
+  color-scheme: dark;
+}
+.e1 { --era: #0E8A8A; --era-soft: #CFEAEA; }
+.e2 { --era: #D9641A; --era-soft: #F7DFCB; }
+.e3 { --era: #1F75D1; --era-soft: #D3E3F7; }
+.e4 { --era: #C73A7C; --era-soft: #F4D4E4; }
+.e5 { --era: #5B3FC9; --era-soft: #DDD6F6; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .e1 { --era: #4FD1D1; --era-soft: #163A3A; }
+  :root:not([data-theme="light"]) .e2 { --era: #F29A5C; --era-soft: #42281A; }
+  :root:not([data-theme="light"]) .e3 { --era: #6EA9F2; --era-soft: #1C2E47; }
+  :root:not([data-theme="light"]) .e4 { --era: #F08AC0; --era-soft: #44213A; }
+  :root:not([data-theme="light"]) .e5 { --era: #A995F5; --era-soft: #2A2348; }
+}
+:root[data-theme="dark"] .e1 { --era: #4FD1D1; --era-soft: #163A3A; }
+:root[data-theme="dark"] .e2 { --era: #F29A5C; --era-soft: #42281A; }
+:root[data-theme="dark"] .e3 { --era: #6EA9F2; --era-soft: #1C2E47; }
+:root[data-theme="dark"] .e4 { --era: #F08AC0; --era-soft: #44213A; }
+:root[data-theme="dark"] .e5 { --era: #A995F5; --era-soft: #2A2348; }
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px calc(84px + env(safe-area-inset-bottom, 0px));
+  font-variant-numeric: tabular-nums;
+  word-break: auto-phrase; /* 日本語を文節で折り返す（対応ブラウザのみ） */
+  overflow-wrap: anywhere;
+}
+p, li, .ds, .det p, .topic li, .readhead p, .prog .hint, .prog .live .sub, header p, .era-head p, .res .sub, .res .say { text-wrap: pretty; }
+.item .nm, .era-head h2, .res h2, .prog .live .ttl { text-wrap: balance; word-break: keep-all; overflow-wrap: anywhere; }
+.item .ds { max-width: 34em; }
+.det p { max-width: 36em; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 42rem; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--era); outline-offset: 2px; }
+
+header h1 { font-family: var(--f-display); font-weight: 400; font-size: 2.2rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+header p { margin: 8px 0 0; color: var(--muted); max-width: 36rem; text-wrap: pretty; }
+
+/* progress card */
+.prog { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 8px; }
+.prog .row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 14px; }
+.prog .lbl { font-size: .75rem; letter-spacing: .1em; color: var(--muted); font-weight: 700; }
+.prog .cnt { font-family: var(--f-dot); font-size: 1.5rem; line-height: 1; }
+.prog .cnt small { font-size: .8rem; color: var(--muted); font-family: var(--f-body); }
+.prog .hint { font-size: .85rem; color: var(--muted); text-wrap: pretty; }
+.prog .live { display: grid; gap: 2px; padding: 10px 12px; border-radius: 8px; background: var(--era-soft); }
+.prog .live .lv { font-size: .7rem; letter-spacing: .1em; color: var(--muted); font-weight: 900; }
+.prog .live .ttl { font-family: var(--f-display); font-size: 1.25rem; line-height: 1.25; text-wrap: balance; color: var(--era); }
+.prog .live .ttl.q { font-family: var(--f-dot); font-size: 2rem; letter-spacing: .2em; }
+.prog .live .sub { font-size: .85rem; color: var(--muted); text-wrap: pretty; }
+.bars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.bars .b { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; }
+.bars .b i { display: block; height: 100%; width: 0; background: var(--era); transition: width .3s; }
+.bars .b span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* tabs */
+.tabs {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 8px; overflow-x: auto; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tabs ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; width: max-content; min-width: 100%; }
+.tab { display: grid; gap: 1px; text-align: left; min-height: 3rem; padding: 6px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; border-bottom: 3px solid var(--era); white-space: nowrap; position: relative; }
+.tab .y { font-family: var(--f-dot); font-size: .95rem; line-height: 1; color: var(--era); }
+.tab .t { font-size: .8rem; font-weight: 700; line-height: 1.2; }
+.tab .done { position: absolute; top: -6px; right: -6px; font-size: .65rem; font-weight: 900; background: var(--fg); color: var(--bg); border-radius: 999px; padding: 1px 6px; }
+.tab[aria-selected="true"] { background: var(--era); color: var(--era-fg); border-color: var(--era); }
+.tab[aria-selected="true"] .y { color: var(--era-fg); }
+@media (min-width: 700px) { .tabs { overflow: visible; } .tabs ul { flex-wrap: wrap; width: auto; min-width: 0; } }
+
+/* era */
+.era { display: grid; gap: 12px; }
+.era-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; align-items: baseline; padding: 14px 16px; border-radius: 8px; background: var(--era-soft); }
+.era-head .y { font-family: var(--f-dot); font-size: 1.6rem; line-height: 1; color: var(--era); grid-row: 1 / span 2; align-self: center; }
+.era-head h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 1.3rem; line-height: 1.2; text-wrap: balance; }
+.era-head p { margin: 0; font-size: .88rem; color: var(--muted); text-wrap: pretty; }
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.item { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 2px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px 10px 12px; }
+.item.top3 { border-color: var(--era); }
+.item.answered { background: color-mix(in srgb, var(--surface) 92%, var(--era)); }
+.item .rk { grid-row: 1 / span 4; font-family: var(--f-dot); font-size: 2rem; line-height: 1; color: var(--era); align-self: start; padding-top: 2px; }
+.item .rk small { font-size: .7rem; display: block; color: var(--muted); font-family: var(--f-body); font-weight: 700; margin-top: 2px; }
+.item .top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+.item .nm { font-family: var(--f-display); font-weight: 400; font-size: 1.3rem; line-height: 1.25; overflow-wrap: anywhere; }
+.item .yr { font-family: var(--f-dot); font-size: .85rem; color: var(--muted); }
+.item .st { font-size: .7rem; font-weight: 900; letter-spacing: .06em; padding: 1px 7px; border-radius: 999px; border: 1px solid; }
+.st.live { color: var(--ok); border-color: var(--ok); }
+.st.dead { color: var(--dead); border-color: var(--dead); }
+.st.cult { color: var(--era); border-color: var(--era); }
+.item .ds { margin: 0; font-size: 1rem; text-wrap: pretty; min-width: 0; }
+.item .acts { display: grid; gap: 8px; margin-top: 8px; }
+.mode-read .seg .ans { min-height: 2.3rem; font-size: .9rem; }
+.det p, .det ul { font-size: 1rem; line-height: 1.75; }
+.det h4 { font-size: .78rem; }
+.topic ul { font-size: .95rem; }
+.readhead { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; }
+.readhead b { font-family: var(--f-display); font-weight: 400; font-size: 1.15rem; }
+.readhead p { margin: 0; color: var(--muted); font-size: .92rem; }
+.readhead .rb { display: flex; gap: 8px; flex-wrap: wrap; }
+.readhead .rb button { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 6px 14px; font-weight: 700; min-height: 2.4rem; }
+.bar .in.two { grid-template-columns: 1fr 1fr; }
+.bar .sec { font-family: var(--f-body); font-size: .95rem; border: 2px solid var(--fg); border-radius: 8px; padding: 10px 14px; min-height: 3rem; background: var(--surface); color: var(--fg); white-space: nowrap; font-weight: 700; }
+
+/* detail */
+.det { grid-column: 1 / -1; display: grid; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.det h4 { margin: 0 0 4px; font-size: .72rem; letter-spacing: .1em; color: var(--muted); font-weight: 900; }
+.det p { margin: 0; font-size: .92rem; text-wrap: pretty; }
+.det ul { margin: 0; padding-left: 1.1rem; font-size: .9rem; display: grid; gap: 2px; }
+/* ---- ネタ札 (scene cards) ---- */
+.card { position: relative; background: var(--era-soft); border-radius: 8px; padding: 12px; display: grid; gap: 8px; overflow: hidden; }
+.card .cap { font-size: .7rem; color: var(--muted); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.card .cap b { font-weight: 900; letter-spacing: .06em; padding: 0 6px; border-radius: 4px; color: var(--era-fg); background: var(--era); }
+.card .cap b.img { background: var(--muted); color: var(--bg); }
+.sc { position: relative; background: var(--surface); color: var(--fg); border-radius: 6px; overflow: hidden; font-size: .82rem; line-height: 1.45; min-width: 0; }
+.sticker {
+  position: absolute; z-index: 2; font-family: var(--f-display); font-size: .78rem; line-height: 1.2; padding: 4px 9px;
+  background: #FFE26A; color: #2b2100; border: 2px dashed #8a6d00; border-radius: 3px; box-shadow: 1px 2px 0 rgba(0,0,0,.25);
+  max-width: 70%; text-wrap: balance;
+}
+.sticker.p1 { right: 8px; top: 8px; transform: rotate(-7deg); }
+.sticker.p2 { left: 8px; bottom: 8px; transform: rotate(4deg); }
+.sticker.p3 { right: 10px; bottom: 10px; transform: rotate(-3deg); }
+.sticker.p4 { left: 10px; top: 10px; transform: rotate(6deg); }
+.censor { fill: #111; }
+.censor-t { fill: #fff; font-family: var(--f-display); font-size: 11px; }
+/* 掲示板 */
+.bbs { font-family: var(--f-aa); background: #EFEFEF; color: #000; padding: 8px 10px; }
+.bbs .bt { font-weight: 700; color: #C00; font-size: .95rem; margin-bottom: 6px; border-bottom: 1px solid #bbb; padding-bottom: 4px; overflow-wrap: anywhere; }
+.bbs .po { margin: 0 0 7px; }
+.bbs .pn { color: #000; font-weight: 700; }
+.bbs .pm { color: #080; font-weight: 700; }
+.bbs .pd { color: #444; font-size: .72rem; }
+.bbs .px { padding: 2px 0 0 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bbs pre.px { margin: 0; font-family: var(--f-aa); white-space: pre; overflow-x: auto; font-size: .78rem; line-height: 1.15; }
+/* テキストサイト */
+.txs { background: #FFFDF2; color: #222; padding: 14px 16px; font-family: var(--f-aa); display: grid; gap: 6px; }
+.txs .sm { font-size: .8rem; color: #333; }
+.txs .huge { font-family: var(--f-display); font-size: clamp(1.7rem, 8vw, 2.6rem); line-height: 1.1; color: #000; font-weight: 400; }
+/* 投稿（つぶやき） */
+.tw { padding: 12px 14px; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 6px 10px; border: 1px solid var(--line); font-size: .9rem; }
+.tw .av { width: 2.4rem; height: 2.4rem; border-radius: 50%; background: var(--era); grid-row: 1 / span 4; }
+.tw .nm { font-weight: 700; } .tw .nm span { color: var(--muted); font-weight: 400; font-size: .75rem; margin-left: 6px; }
+.tw .tx { overflow-wrap: anywhere; white-space: pre-wrap; }
+.tw .ph { background: var(--surface2); border-radius: 10px; border: 1px solid var(--line); max-width: 100%; min-height: 5rem; display: grid; place-items: center; color: var(--muted); font-size: .75rem; position: relative; overflow: hidden; }
+.tw .ph svg { display: block; width: 100%; height: auto; }
+.tw .mt { color: var(--muted); font-size: .72rem; display: flex; gap: 14px; flex-wrap: wrap; }
+.tw .rp { grid-column: 2; border-top: 1px solid var(--line); padding-top: 6px; display: grid; gap: 3px; font-size: .8rem; }
+.tw .rp span { color: var(--muted); font-size: .72rem; margin-right: 6px; }
+.stamp-fire { position: absolute; right: 10px; top: 8px; font-family: var(--f-display); color: #D1261F; border: 3px solid #D1261F; border-radius: 6px; padding: 2px 8px; transform: rotate(-10deg); font-size: 1.1rem; background: rgba(255,255,255,.7); }
+/* トーク */
+.ch { background: #7494C0; padding: 10px 10px 8px; display: grid; gap: 6px; }
+.ch .hd { color: #fff; font-size: .72rem; text-align: center; opacity: .9; }
+.ch .m { display: flex; gap: 6px; align-items: flex-end; }
+.ch .m.r { justify-content: flex-end; }
+.ch .b { max-width: 78%; padding: 6px 10px; border-radius: 14px; background: #fff; color: #111; overflow-wrap: anywhere; white-space: pre-wrap; }
+.ch .m.r .b { background: #8DE055; border-bottom-right-radius: 4px; }
+.ch .m.l .b { border-bottom-left-radius: 4px; }
+.ch .rd { font-size: .62rem; color: #fff; opacity: .9; line-height: 1.2; text-align: right; }
+/* 動画（コメントが流れる） */
+.nc { background: #111; color: #fff; max-width: 100%; position: relative; font-family: var(--f-aa); }
+.nc svg { display: block; width: 100%; height: auto; }
+.nc .cm { position: absolute; white-space: nowrap; font-size: clamp(.7rem, 2.6vw, 1rem); font-weight: 700; text-shadow: 0 0 3px #000, 0 0 2px #000; }
+.nc .tt { position: absolute; left: 0; right: 0; top: 0; background: rgba(0,0,0,.55); font-size: .72rem; padding: 3px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nc .sub { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center; font-family: var(--f-display); font-size: clamp(.9rem, 3.4vw, 1.3rem); color: #FFE26A; text-shadow: 0 0 4px #000, 0 0 2px #000; }
+.nc .bar { height: 12px; background: #222; }
+.nc .bar i { display: block; height: 3px; width: 38%; background: #FFE26A; margin-top: 4px; }
+/* ショート動画 */
+.sh { background: #000; color: #fff; width: min(100%, 230px); margin-inline: auto; position: relative; border-radius: 10px; overflow: hidden; }
+.sh svg { display: block; width: 100%; height: auto; }
+.sh .cp { position: absolute; left: 10px; right: 46px; bottom: 14px; font-weight: 700; font-size: .85rem; text-shadow: 0 1px 3px #000; overflow-wrap: anywhere; }
+.sh .side { position: absolute; right: 8px; bottom: 16px; display: grid; gap: 10px; font-size: .6rem; text-align: center; }
+.sh.lt .cp { color: #111; text-shadow: none; }
+.sh.lt .side { color: #111; }
+.sh.lt .side i { background: rgba(0,0,0,.15); }
+.sh .side i { display: block; width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.25); margin: 0 auto 2px; }
+/* 写真投稿 */
+.ig { border: 1px solid var(--line); }
+.ig .hd { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-size: .78rem; font-weight: 700; }
+.ig .hd i { width: 1.4rem; height: 1.4rem; border-radius: 50%; background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7); }
+.ig .ph { max-width: 100%; position: relative; overflow: hidden; }
+.ig .ph svg { display: block; width: 100%; height: auto; }
+.ig .ft { padding: 6px 10px 8px; font-size: .78rem; display: grid; gap: 2px; }
+.ig .ft b { font-weight: 700; }
+/* 場面イラスト */
+.scene { max-width: 100%; position: relative; }
+.scene svg { display: block; width: 100%; height: auto; }
+/* ゲーム画面 */
+.gm { background: #000; color: #fff; max-width: 100%; position: relative; font-family: var(--f-dot); image-rendering: pixelated; }
+.gm svg { display: block; width: 100%; height: auto; }
+.topic { background: var(--surface2); border-radius: 8px; padding: 10px 12px; }
+.topic h4 { color: var(--era); }
+.topic ul { font-size: .88rem; display: grid; gap: 5px; }
+
+.world { border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; }
+.world h3 { margin: 0 0 6px; font-size: .78rem; letter-spacing: .1em; color: var(--muted); font-weight: 900; }
+.world ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.world li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; font-size: .9rem; }
+.world li .yr { font-family: var(--f-dot); color: var(--era); }
+.nexts { display: flex; justify-content: flex-end; }
+.nexts button { border: 1px solid var(--era); color: var(--era); background: var(--surface); border-radius: 6px; padding: 8px 14px; font-weight: 700; min-height: 2.6rem; }
+
+details.about { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+details.about summary { font-weight: 700; cursor: pointer; min-height: 1.8rem; }
+details.about ul { margin: 8px 0 2px; padding-left: 1.2rem; display: grid; gap: 4px; max-width: 36rem; }
+footer { color: var(--muted); font-size: .8rem; text-wrap: pretty; }
+.about-wrap { display: grid; gap: 10px; }
+/* 共通部品のフッターを本文の中に折りたたみで置く（haishin.footerIn）。見た目を上の「このランキングについて」に合わせる */
+.about-wrap .sb-foot.sb-in:not(.sb-compact) { margin: 0; background: var(--surface) !important; border: 1px solid var(--line) !important; border-radius: 8px; color: var(--fg); }
+.about-wrap .sb-foot.sb-in .sb-fs { color: var(--muted); opacity: 1; }
+/* footerCompact：ボタン2つだけ（配信・動画で使う方へ／利用規約・このゲームについて）。規約の文は ⓘ の中 */
+.about-wrap .sb-foot.sb-compact { margin: 2px 0 0; }
+.about-wrap .sb-foot.sb-compact .sb-a.sb-banner { background: var(--surface) !important; color: var(--fg) !important; border: 1px solid var(--line) !important; border-left: 5px solid #ff3fa4 !important; border-radius: 8px !important; font-family: inherit; }
+.about-wrap .sb-foot.sb-compact .sb-a.sb-banner:hover { background: var(--surface2) !important; }
+.about-wrap .sb-foot.sb-compact .sb-a.sb-banner b { font-family: var(--f-body); font-weight: 900; font-size: 1.2rem; letter-spacing: .01em; }
+.about-wrap .sb-foot.sb-compact .sb-a.sb-banner small { color: var(--muted); opacity: 1; }
+.about-wrap .sb-foot.sb-compact .sb-a.sb-2 { background: var(--surface) !important; color: var(--fg) !important; border: 1px solid var(--line) !important; border-radius: 999px !important; justify-self: start; min-height: 42px; padding: 10px 18px; }
+
+
+/* ===== あの頃の見た目（スキン） ===== */
+.skinbar { display: flex; justify-content: flex-end; }
+.skinbar button { display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px 6px 8px; font-weight: 700; font-size: .9rem; min-height: 2.6rem; }
+.skinbar button i { width: 34px; height: 20px; border-radius: 10px; background: var(--surface2); position: relative; display: inline-block; }
+.skinbar button i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: left .15s; }
+.skinbar button[aria-pressed="true"] { border-color: var(--fg); }
+.skinbar button[aria-pressed="true"] i { background: var(--fg); }
+.skinbar button[aria-pressed="true"] i::after { left: 16px; background: var(--bg); }
+
+/* 標準の3択：丸いピル型（統一の標準） */
+.seg { display: flex; gap: 8px; border: 0; background: transparent; width: auto; border-radius: 0; overflow: visible; flex-wrap: wrap; }
+.seg .ans { font-size: .95rem; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; min-height: 2.5rem; color: var(--muted); font-weight: 700; flex: 1 1 0; min-width: 0; white-space: nowrap; }
+.seg .ans[aria-pressed="true"] { background: var(--era); color: var(--era-fg); border-color: var(--era); }
+.seg .ans[data-v="0"][aria-pressed="true"] { background: var(--muted); border-color: var(--muted); color: var(--bg); }
+.item.answered .seg { border: 0; }
+
+/* 1999-2004：掲示板 */
+.skin .era.e1 { font-family: var(--f-aa); color: #000; }
+.skin .era.e1 .era-head { background: #CCCCFF; border: 1px solid #99F; border-radius: 0; padding: 8px 12px; }
+.skin .era.e1 .era-head .y { color: #000; font-family: var(--f-aa); font-size: 1rem; font-weight: 700; }
+.skin .era.e1 .era-head h2 { font-family: var(--f-aa); color: #C00; font-size: 1.15rem; }
+.skin .era.e1 .era-head p { color: #333; }
+.skin .era.e1 .list { background: #EFEFEF; padding: 10px 12px; gap: 14px; border: 1px solid #ccc; counter-reset: bbs; }
+.skin .era.e1 .item, .skin .era.e1 .item.top3, .skin .era.e1 .item.answered { background: transparent; border: 0; border-radius: 0; padding: 0; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.skin .era.e1 .item .rk { display: none; }
+.skin .era.e1 .item .top::before { content: counter(bbs) " 名前：名無しさん 投稿日：" attr(data-y); counter-increment: bbs; display: block; width: 100%; color: #080; font-weight: 700; font-size: .9rem; }
+.skin .era.e1 .item .nm { font-family: var(--f-aa); font-weight: 700; font-size: 1.15rem; padding-left: 16px; }
+.skin .era.e1 .item .yr, .skin .era.e1 .item .st { font-family: var(--f-aa); border: 0; color: #444; padding: 0; font-size: .85rem; }
+.skin .era.e1 .item .ds { padding-left: 16px; color: #000; }
+.skin .era.e1 .item .acts { padding-left: 16px; margin-top: 4px; }
+.skin .era.e1 .seg .ans { font-family: var(--f-aa); flex: 0 1 auto; min-height: 2.2rem; padding: 2px 12px; font-size: .95rem; background: #E8E8E8; border: 2px outset #DDD; border-radius: 0; color: #000; }
+.skin .era.e1 .seg .ans[aria-pressed="true"] { border-style: inset; background: #FFF4A8; color: #000; }
+.skin .era.e1 .seg .ans[data-v="0"][aria-pressed="true"] { background: #DDD; color: #333; }
+.skin .era.e1 .world { font-family: var(--f-aa); background: #EFEFEF; border: 1px solid #ccc; color: #000; }
+.skin .era.e1 .world h3, .skin .era.e1 .world .yr { color: #080; }
+.skin .era.e1 .nexts button { font-family: var(--f-aa); color: #00C; text-decoration: underline; border: 0; background: none; }
+.skin .era.e1 .det { color: #000; }
+
+/* 2005-2009：動画サイト（白地・動画一覧） */
+.skin .era.e2 { color: #333; }
+.skin .era.e2 .era-head { background: #fff; color: #333; border-radius: 0; border: 1px solid #ccc; border-top: 4px solid #252525; }
+.skin .era.e2 .era-head .y { color: #252525; }
+.skin .era.e2 .era-head h2 { color: #252525; }
+.skin .era.e2 .era-head p { color: #666; }
+.skin .era.e2 .list { background: #fff; border: 1px solid #ccc; padding: 0; gap: 0; }
+.skin .era.e2 .item, .skin .era.e2 .item.top3, .skin .era.e2 .item.answered { background: #fff; border: 0; border-bottom: 1px solid #ddd; border-radius: 0; grid-template-columns: 7rem minmax(0, 1fr); padding: 10px 12px; gap: 4px 12px; }
+.skin .era.e2 .item .rk { grid-column: 1; grid-row: 1 / span 3; width: 7rem; height: 4rem; background: #000; color: #fff; font-size: 0; position: relative; overflow: hidden; border: 1px solid #999; }
+.skin .era.e2 .item .rk::before { content: "ｗｗｗｗｗｗ　　　うぽつ　　　　　　　　88888888　　　ｗｗｗ　　　　　　　神"; position: absolute; left: 0; right: 0; top: 4px; font-size: 9px; line-height: 15px; color: #fff; white-space: pre-wrap; opacity: .85; text-align: left; padding: 0 2px; }
+.skin .era.e2 .item .rk::after { content: attr(data-r) "位"; position: absolute; right: 3px; bottom: 2px; font-size: 10px; background: rgba(0,0,0,.7); padding: 0 4px; color: #ffd166; }
+.skin .era.e2 .item .rk small { display: none; }
+.skin .era.e2 .item > * { grid-column: 2; }
+.skin .era.e2 .item .rk { grid-column: 1; }
+.skin .era.e2 .item .nm { color: #0033cc; font-family: var(--f-body); font-weight: 700; font-size: 1.1rem; text-decoration: underline; text-underline-offset: 2px; }
+.skin .era.e2 .item .yr { color: #666; font-size: .82rem; }
+.skin .era.e2 .item .yr::after { content: "　再生：" attr(data-n) "　コメント：" attr(data-c) "　マイリスト：" attr(data-m); }
+.skin .era.e2 .item .ds { color: #333; font-size: .92rem; }
+.skin .era.e2 .seg .ans { min-height: 2.3rem; font-size: .9rem; background: #f5f5f5; border: 1px solid #bbb; border-radius: 3px; color: #333; }
+.skin .era.e2 .seg .ans[aria-pressed="true"] { background: #252525; color: #fff; border-color: #252525; }
+.skin .era.e2 .world { background: #fff; border-color: #ccc; color: #333; }
+.skin .era.e2 .nexts button { color: #0033cc; border-color: #ccc; background: #f5f5f5; }
+
+/* 2010-2014：タイムライン */
+.skin .era.e3 .list { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; gap: 0; }
+.skin .era.e3 .item, .skin .era.e3 .item.top3, .skin .era.e3 .item.answered { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; grid-template-columns: 2.8rem minmax(0, 1fr); padding: 14px; gap: 4px 12px; }
+.skin .era.e3 .item:last-child { border-bottom: 0; }
+.skin .era.e3 .item > * { grid-column: 2; }
+.skin .era.e3 .item .rk { grid-column: 1; grid-row: 1 / span 2; width: 2.8rem; height: 2.8rem; border-radius: 50%; font-size: 0; position: relative; overflow: hidden; background: var(--era); }
+.skin .era.e3 .item .rk::before { content: ""; position: absolute; left: 50%; top: 22%; width: 38%; height: 38%; margin-left: -19%; border-radius: 50%; background: #fff; }
+.skin .era.e3 .item .rk::after { content: ""; position: absolute; left: 50%; top: 66%; width: 76%; height: 60%; margin-left: -38%; border-radius: 50% 50% 0 0; background: #fff; }
+.skin .era.e3 .item .rk small { display: none; }
+.skin .era.e3 .item .top::before { content: "ネット年齢チェック @netage_" attr(data-y); color: var(--muted); font-size: .8rem; width: 100%; font-weight: 400; }
+.skin .era.e3 .item .ds::after { content: "\A返信 " attr(data-rp) "　リツイート " attr(data-rt) "　お気に入り " attr(data-fv) "　· " attr(data-y) "年"; white-space: pre; display: block; color: var(--muted); font-size: .78rem; margin-top: 4px; }
+.skin .era.e3 .seg .ans { border-radius: 999px; border: 1.5px solid #ccc; background: #fff; min-height: 2.4rem; font-size: .88rem; padding: 4px 4px; }
+.skin .era.e3 .seg .ans[aria-pressed="true"] { background: var(--era); color: var(--era-fg); border-color: var(--era); }
+
+/* 2015-2019：写真投稿 */
+.skin .era.e4 .list { gap: 14px; }
+.skin .era.e4 .item, .skin .era.e4 .item.top3, .skin .era.e4 .item.answered { grid-template-columns: minmax(0, 1fr); border: 1px solid var(--line); border-radius: 4px; padding: 0; overflow: hidden; gap: 0; background: var(--surface); }
+.skin .era.e4 .item .rk { display: none; }
+.skin .era.e4 .item::before { content: "netmeme_" attr(data-y) "　　　　　　　　　　　　　　…"; order: 0; display: block; padding: 8px 12px 8px 46px; font-size: .82rem; font-weight: 700; border-bottom: 1px solid var(--line); position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skin .era.e4 .item { position: relative; }
+.skin .era.e4 .item .top::after { content: ""; position: absolute; left: 10px; top: 5px; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #fff 0 22%, transparent 23%), radial-gradient(ellipse at 50% 92%, #fff 0 36%, transparent 37%), linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px #ee2a7b; }
+.skin .era.e4 .item::after { content: "♡　○　▷　　　　　　　　　　　　　　　　□"; order: 1; display: block; padding: 8px 12px 0; font-size: 1.05rem; letter-spacing: .15em; white-space: nowrap; overflow: hidden; }
+.skin .era.e4 .item .top { order: 2; padding: 10px 12px 0; }
+.skin .era.e4 .item .top::before { content: "いいね！" attr(data-lk) "件"; width: 100%; font-weight: 700; font-size: .85rem; }
+.skin .era.e4 .item .ds { order: 3; padding: 2px 12px 8px; }
+.skin .era.e4 .item .ds::after { content: "\A#" attr(data-tag) " #" attr(data-y) "年 #ネット年齢チェック"; white-space: pre; display: block; color: #00376b; font-size: .85rem; }
+.skin .era.e4 .item .acts { order: 4; padding: 0 12px 12px; margin: 0; }
+.skin .era.e4 .item .det { order: 5; padding: 0 12px 12px; margin: 0; border: 0; }
+.skin .era.e4 .seg .ans { border-radius: 8px; border: 1.5px solid #dbdbdb; background: #fff; min-height: 2.6rem; font-size: .9rem; }
+.skin .era.e4 .seg .ans[aria-pressed="true"] { background: #e1306c; color: #fff; border-color: #e1306c; }
+
+/* 2020-2026：ショート動画 */
+.skin .era.e5 .list { gap: 12px; }
+.skin .era.e5 .item, .skin .era.e5 .item.top3, .skin .era.e5 .item.answered { background: #0f0f12; color: #fff; border: 0; border-radius: 14px; grid-template-columns: minmax(0, 1fr) 3rem; padding: 16px 10px 14px 14px; gap: 4px 8px; }
+.skin .era.e5 .item .rk { grid-column: 2; grid-row: 1 / span 3; font-size: .62rem; color: #fff; text-align: center; display: grid; gap: 12px; align-content: start; padding-top: 2px; font-family: var(--f-body); line-height: 1.1; }
+.skin .era.e5 .item .rk::before { content: "♥"; display: block; width: 2.4rem; height: 2.4rem; margin: 0 auto 2px; border-radius: 50%; background: rgba(255,255,255,.16); line-height: 2.4rem; font-size: 1.1rem; }
+.skin .era.e5 .item .rk::after { content: "💬\A" attr(data-c2) "\A\A↗\A共有"; white-space: pre; display: block; font-size: .62rem; line-height: 1.25; }
+.skin .era.e5 .item .rk small { color: #fff; font-size: .62rem; display: block; }
+.skin .era.e5 .item .top::before { content: "@netmeme_" attr(data-y); width: 100%; font-weight: 700; color: #fff; font-size: .9rem; }
+.skin .era.e5 .item .nm { color: #fff; }
+.skin .era.e5 .item .yr { color: #bbb; }
+.skin .era.e5 .item .ds { color: #eee; }
+.skin .era.e5 .item .ds::before { content: "#" attr(data-tag) " #" attr(data-y) "年　"; color: #7afcff; }
+.skin .era.e5 .item .ds::after { content: "\A♫ オリジナル楽曲 - netmeme"; white-space: pre; display: block; color: #bbb; font-size: .8rem; margin-top: 2px; }
+.skin .era.e5 .item .acts { grid-column: 1; }
+.skin .era.e5 .seg .ans { border-radius: 999px; border: 0; background: #2a2a31; color: #fff; min-height: 2.5rem; font-size: .88rem; padding: 4px 4px; }
+.skin .era.e5 .seg .ans[aria-pressed="true"] { background: #fff; color: #000; }
+.skin .era.e5 .item .det { grid-column: 1 / -1; color: #eee; border-top-color: #333; }
+.skin .era.e5 .item .det h4 { color: #bbb; }
+.skin .era.e5 .item .topic { background: #1a1a1f; }
+.skin .era.e5 .item .card { background: #1a1a1f; }
+
+/* bottom bar */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 8;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.bar .in { max-width: 42rem; margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.bar .pct { display: grid; gap: 4px; min-width: 0; }
+.bar .pct .t { font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .pct .tr { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; }
+.bar .pct .tr i { display: block; height: 100%; width: 0; background: var(--fg); transition: width .3s; }
+.go { font-family: var(--f-display); font-size: 1.05rem; border: 0; border-radius: 8px; padding: 10px 20px; min-height: 3rem; background: var(--fg); color: var(--bg); white-space: nowrap; }
+.go:disabled { opacity: .45; cursor: not-allowed; }
+
+/* result overlay */
+.ov { position: fixed; inset: 0; z-index: 9995; background: rgba(8, 10, 14, .78); display: grid; place-items: center; overflow: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: calc(16px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)); }
+.ov canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.ovin { position: relative; display: grid; gap: 12px; width: min(420px, 100%); }
+.res {
+  position: relative; background: var(--surface); color: var(--fg); border-radius: 14px; padding: 22px 20px 18px;
+  border: 4px solid var(--era); overflow: hidden; display: grid; gap: 12px;
+  animation: pop .55s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+.res .eyebrow { font-size: .72rem; letter-spacing: .14em; font-weight: 900; color: var(--muted); }
+.res .rank { display: inline-flex; align-items: center; gap: 6px; justify-self: start; font-size: .78rem; font-weight: 900; letter-spacing: .06em; padding: 2px 10px; border-radius: 999px; background: var(--era); color: var(--era-fg); }
+.res h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(1.6rem, 7vw, 2.1rem); line-height: 1.2; text-wrap: balance; }
+.res .sub { margin: 0; font-size: .9rem; color: var(--muted); text-wrap: pretty; }
+.res .score { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; align-items: end; }
+.res .score b { font-family: var(--f-dot); font-size: 3.6rem; line-height: .9; font-weight: 400; color: var(--era); grid-row: 1 / span 2; }
+.res .score .u { font-size: .75rem; color: var(--muted); }
+.res .score .yrs { font-size: .95rem; font-weight: 700; }
+.res .bars2 { display: grid; gap: 5px; }
+.res .bars2 .r { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) 2rem; gap: 8px; align-items: center; font-size: .72rem; }
+.res .bars2 .r .nm { font-family: var(--f-dot); color: var(--muted); white-space: nowrap; }
+.res .bars2 .r .tr { height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; }
+.res .bars2 .r .tr i { display: block; height: 100%; background: var(--era); }
+.res .bars2 .r .tr i.hot { background: var(--era); }
+.res .bars2 .r .n { text-align: right; color: var(--muted); }
+.res .say { margin: 0; font-size: .98rem; font-weight: 700; line-height: 1.5; padding: 10px 12px; border-left: 4px solid var(--era); background: var(--era-soft); border-radius: 0 8px 8px 0; text-wrap: pretty; }
+.res .tag { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: .72rem; color: var(--muted); }
+.res .tag b { font-family: var(--f-display); font-weight: 400; color: var(--fg); }
+.stamp {
+  position: absolute; top: 14px; right: 14px; font-family: var(--f-display); font-size: 1.6rem; line-height: 1;
+  color: var(--era); border: 3px solid var(--era); border-radius: 8px; padding: 6px 10px; transform: rotate(-12deg);
+  background: var(--surface); animation: stamp .5s .25s cubic-bezier(.2, 1.6, .4, 1) both; opacity: .95;
+}
+.res.t0 { border-color: var(--muted); }
+.res.t0 .stamp, .res.t0 .rank, .res.t0 .score b { color: var(--muted); border-color: var(--muted); }
+.res.t0 .rank { background: var(--muted); color: var(--bg); }
+.res.t0 .say { border-color: var(--muted); background: var(--surface2); }
+.res.t5 { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold2), 0 0 40px rgba(226, 182, 74, .5); }
+.res.t5::before { content: ""; position: absolute; inset: -40%; background: conic-gradient(from 0deg, transparent 0 70%, rgba(255, 235, 170, .35) 75%, transparent 80%); animation: spin 5s linear infinite; pointer-events: none; }
+.res.t5 .stamp { color: var(--gold); border-color: var(--gold); }
+.res.t5 .rank { background: var(--gold); color: #1a1200; }
+.res.t4 { box-shadow: 0 0 0 3px var(--era-soft), 0 0 36px color-mix(in srgb, var(--era) 55%, transparent); }
+.ovbtns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.ovbtns button { border: 1px solid rgba(255, 255, 255, .5); background: rgba(255, 255, 255, .08); color: #fff; border-radius: 8px; padding: 8px 14px; min-height: 2.6rem; font-weight: 700; }
+.ovbtns .pri { background: #fff; color: #141A22; border-color: #fff; }
+.ovbtns .era-b { background: var(--era); color: var(--era-fg); border-color: var(--era); font-family: var(--f-display); font-size: 1.05rem; }
+.sharebar { margin: 10px auto 0; max-width: 520px; }
+.ovstream { margin: 10px auto 0; max-width: 520px; display: flex; justify-content: center; }
+.ovstream button { appearance: none; border: 2px solid #ff3fa4; background: rgba(20,20,28,.9); color: #fff; border-radius: 999px; padding: 10px 16px; font: 700 .85rem/1.3 inherit; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.ovstream button i { width: 10px; height: 10px; border-radius: 50%; background: #ff3fa4; box-shadow: 0 0 0 4px rgba(255,63,164,.25); flex: none; }
+.sharebar .k-share { justify-content: center; }
+.sharebar .k-b { background: #fff !important; color: #111 !important; border-color: transparent !important; font-weight: 700; padding: 10px 14px !important; border-radius: 999px !important; }
+body.ov-open #kyotsu-btn, body.ov-open .sb-float { display: none !important; }
+.ovnote { text-align: center; color: rgba(255, 255, 255, .75); font-size: .8rem; }
+.ovextra { display: grid; gap: 8px; }
+.ovextra a { display: grid; gap: 2px; text-align: center; text-decoration: none; background: rgba(255,255,255,.1); border: 1px dashed rgba(255,255,255,.5); color: #fff; border-radius: 10px; padding: 10px 14px; font-weight: 700; }
+.ovextra a small { font-weight: 400; color: rgba(255,255,255,.75); font-size: .78rem; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes stamp { from { transform: rotate(-12deg) scale(3); opacity: 0; } 70% { opacity: 1; } to { transform: rotate(-12deg) scale(1); opacity: .95; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .res, .stamp, .res.t5::before { animation: none !important; }
+  .bars .b i, .bar .pct .tr i { transition: none; }
+}
+@media (max-width: 420px) {
+  header h1 { font-size: 1.85rem; }
+  .item { grid-template-columns: 2.2rem minmax(0, 1fr); padding: 10px 10px 8px 10px; }
+  .item .rk { font-size: 1.7rem; }
+  .go { padding: 10px 14px; font-size: .95rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>ネット年齢チェック</h1>
+    <p>1999年から2026年まで、日本のネットで流行った言葉・ネタ・AAを5つの時代に分けて10位までランキング。まずは「知らない／知ってる／使ってた」を押すだけ。判定のあとに、ネタ札と解説のページが開きます。</p>
+  </header>
+
+  <section class="prog e1" id="prog" aria-label="回答の進みぐあい">
+    <div class="row">
+      <span class="lbl">回答のすすみ</span>
+      <span class="cnt"><span id="cnt">0</span><small> / 50</small></span>
+    </div>
+    <div class="live" aria-live="polite">
+      <span class="lv" id="lv">いまの途中判定</span>
+      <span class="ttl" id="lttl">まだ判定前</span>
+      <span class="sub" id="lsub">押していくと、ここが変わります。</span>
+    </div>
+    <div class="bars" id="bars" aria-hidden="true"></div>
+    <div class="hint" id="hint">時代ごとに10個。全部答えなくても判定できますが、答えるほど正確に正体がばれます。</div>
+  </section>
+
+  <div class="skinbar"><button type="button" id="skinBtn" aria-pressed="false"><i></i>あの頃の見た目で表示</button></div>
+
+  <nav class="tabs" aria-label="時代をえらぶ">
+    <ul role="tablist" id="tablist"></ul>
+  </nav>
+
+  <section class="era" id="era" aria-live="polite"></section>
+
+  <div class="about-wrap" id="about">
+  <details class="about">
+    <summary>このランキングについて</summary>
+    <ul>
+      <li>順位は「どれだけ広まったか」「今も通じるか」「その時代らしさ」を見て、AIが独断で付けました。正式な調査ではありません。</li>
+      <li>年は「だいたい流行り始めた頃」です。前後1〜2年のずれはあります。</li>
+      <li>ラベル：<b>現役</b>＝今も普通に使われる／<b>死語</b>＝言うと時代がばれる／<b>通好み</b>＝ネットに長くいる人だけ通じる。</li>
+      <li>スコアは「使ってた」2点、「知ってる」1点、「知らない」0点の合計（100点満点）。</li>
+      <li>回答はあなたのブラウザの中だけに残ります。</li>
+    </ul>
+  </details>
+  </div>
+
+  <footer>ネタの名前はすべて、当時ネットで実際に使われた言葉です。元ネタの画像・動画は載せていません。</footer>
+</div>
+
+<div class="bar">
+  <div class="in" id="barin">
+    <div class="pct" id="barpct">
+      <div class="t" id="bart">まだ回答なし</div>
+      <div class="tr"><i id="bari"></i></div>
+    </div>
+    <button class="go" id="go" type="button">判定する！</button>
+    <button class="sec" id="goAnswer" type="button" hidden>答える画面へ</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* item: [name, year, status, short, detail, [examples], talk, aa?] */
+  var ERAS = [
+    {
+      id: 'e1', years: '1999-2004', title: '2ちゃんねる・テキストサイト時代', short: '2ch期',
+      lead: 'ダイヤルアップから常時接続へ。文字と顔文字（AA）だけで笑わせていた頃。',
+      age: { title: 'ネット古参。2000年前後からいる人', sub: '掲示板とテキストサイトで育った世代。「ぬるぽ」に「ガッ」と返せるなら間違いありません。' },
+      items: [
+        ['キターーー(゜∀゜)ーーー!!', '1999頃', 'live', '何か起きた瞬間に貼る万能の叫び。ネット語が世間に出た最初の例のひとつ。',
+          '1999年ごろ2ちゃんねるで生まれた、待ちに待ったものが来た瞬間の叫び。横棒を長くするほど興奮度が上がる。2001年ごろからテレビ番組で紹介され、ネットの外にも広がった。',
+          ['新作発表キターーー!!', '給料日キター(゜∀゜)'], '人生で一番「キター！」って叫んだ瞬間、いつ？',
+          'キタ━━━━━━(゜∀゜)━━━━━━ !!!!!'],
+        ['(´・ω・`) ショボーン', '2001頃', 'live', 'しょんぼりした顔のAA。最長寿クラスの顔文字。',
+          '2001年ごろ、「ω」を口に見立てたしょんぼり顔として2chで定着。擬音の「ショボーン」とセットで使う。携帯の絵文字やLINEスタンプにも引き継がれ、2020年代でも普通に通じる。',
+          ['財布忘れた(´・ω・`)', '今日も残業(´・ω・`)ショボーン'], '顔文字、今でも使う？ 使うならどれ？',
+          '(´・ω・`)'],
+        ['ぬるぽ → ガッ', '2002頃', 'cult', '誰かが「ぬるぽ」と書くと、別の誰かが「ガッ」と叩く。通じれば仲間。',
+          '2002年、プログラムのエラー「NullPointerException」を略した「ぬるぽ」に、誰かが「ガッ」と殴るAAで返したのが始まり。意味はほぼ無いが、2ch住人の合言葉として20年以上続いている。',
+          ['「ぬるぽ」「　　ガッ」', '就活でぬるぽって言ったら面接官がガッって言った（という伝説）'], '意味知らずに「ガッ」って返してた人、手を挙げて。',
+          '　（　・∀・）　　　|　|　ガッ\n　と　　　　）　 　 |　|\n　　Ｙ　/ノ　　　　人\n　　　/　）　　 　 <　　>__Λ∩\n　＿/し\'　／／. Ｖ｀Д´）/\n　（＿フ彡　　　　　　　/　←ぬるぽ'],
+        ['オマエモナー', '1999頃', 'dead', '2ch初期のキャラ「モナー」の決めゼリフ。言い返しの定番だった。',
+          '1999年、前身の掲示板「あめぞう」から2chに受け継がれた猫キャラ「モナー」のセリフ。「お前もな」と言い返す。2002年にはおもちゃ会社がギコ猫の商標を出願して反発を受け取り下げるなど、AAキャラが世間に知られるきっかけにもなった。',
+          ['「暇人乙」「オマエモナー」'], 'モナーとギコ猫、どっち派だった？',
+          '　　∧＿∧\n　（　´∀｀）＜　オマエモナー\n　（　　　　）\n　｜ ｜　|\n　（＿_）＿）'],
+        ['電車男', '2004', 'cult', '掲示板の書き込みが本・ドラマ・映画に。ネットの出来事がお茶の間に届いた象徴。',
+          '2004年、2chの独身男性板に書かれた「電車で女性を助けた男の恋愛相談」が本になり、2005年にドラマ・映画化。オタクの恋と「2ちゃんねる」という場所が世間に広く知られた。実話か創作かは今も議論がある。',
+          ['ガンガレ、超ガンガレ', 'エルメスさん'], '電車男、本当だったと思う？ 作り話だと思う？'],
+        ['吉野家コピペ', '2001', 'dead', '長文をそのまま貼って笑いを取る「コピペ文化」の代表作。',
+          '2001年、「吉野家ディレクトリ」というテキストサイトの文章が2chで貼り回された。「150円引きで素人が来て大変なことに」という愚痴の長文で、「〇〇コピペ」として改変される文化の元祖になった。',
+          ['そこでまたぶち切れですよ', '通の頼み方はねぎだく'], '長文コピペ、暗唱できるやつある？'],
+        ['逝ってよし', '1999頃', 'dead', '「消えろ」を少しふざけて言う2ch語。完全に死語。',
+          '1999年ごろ、「死ね」や「消えろ」を「逝く」の字でふざけて言う2ch語。ギコ猫の決めゼリフでもあった。今はほぼ使われず、言うと確実に年がばれる。',
+          ['スレ違い。逝ってよし'], '今だったら怒られる昔のネット語、ほかに何がある？'],
+        ['〜厨（厨房）', '2000頃', 'live', '「中坊」の誤変換から。「〇〇厨」の形で今も現役。',
+          '2000年ごろ、「中学生」→「中坊」→誤変換で「厨房」→略して「厨」。幼稚な人への呼び方として定着し、「〇〇厨」で「〇〇ばかり主張する人」を指すようになった。「夏厨」は夏休みに増える子ども、「懐古厨」は昔は良かったと言う人。',
+          ['夏厨', '懐古厨', '速報厨'], '自分は何厨だと思う？'],
+        ['大文字芸（テキストサイト）', '2001頃', 'dead', '文字をドカンと大きくして落ちをつける日記スタイル。',
+          '2001年ごろ、「侍魂」などのテキストサイトで、ツッコミの一言だけを巨大な文字で見せる書き方が流行。中国のロボット「先行者」をいじった記事が特に有名。ブログ以前の個人サイト文化の頂点だった。',
+          ['そして気づいた。　　　　財布が無い。'], 'テキストサイト読んでた人、どれくらいいる？'],
+        ['おにぎりワッショイ', '2000頃', 'dead', '意味はない。みんなで「ワッショイ」と騒ぐ勢いだけのAA。',
+          '2000年ごろ、おにぎりのAAが「ワッショイ」と連呼するだけのネタ。意味はなく、勢いで盛り上がる当時の2chのノリそのもの。「ワショーイ」とも書いた。',
+          ['オニギリワッショイ!!'], '意味ないのに盛り上がったネタ、ほかにある？',
+          '　　　＼＼　オニギリワッショイ!!　／／\n　＋　　　＼＼　オニギリワッショイ!!　／／　＋\n　　　　　　　▲　　　▲　　　▲\n　＋　　　　／■＼　／■＼　／■＼　　＋\n　　　　　（　´∀｀∩(´∀｀∩)（　´∀｀）\n　　　　　（（　　⊂　）　　ノ　（つ　　丿\n　　　　　　ヽ　（　ノ　（　ヽノ　　（　ヽノ\n　　　　　　（＿）し\'　し(＿)　　し(＿)']
+      ],
+      world: [['1996', 'ダンシングベイビー（踊る赤ちゃんの3D動画）'], ['1998', 'ハムスターダンス'], ['2001', 'All your base are belong to us（ゲームの変な英語訳）']]
+    },
+    {
+      id: 'e2', years: '2005-2009', title: 'ニコニコ動画・Flash・mixi時代', short: 'ニコ動期',
+      lead: '文字から動画へ。コメントが流れる画面と、歌ってみた・ゆっくりが生まれた頃。',
+      age: { title: 'ニコ動世代。2000年代後半に夜ふかしした人', sub: '流れるコメントと「歌ってみた」を一番楽しんだ世代。深夜のランキング巡回、やってましたね。' },
+      items: [
+        ['ゆっくりしていってね!!!', '2008', 'live', '丸い顔のキャラが機械の声で話す「ゆっくり」の始まり。',
+          '2008年、同人ゲーム「東方Project」のキャラの顔をまんじゅうのように描いたAAが2chで生まれ、ニコ動で合成音声の実況「ゆっくり実況」に発展。2020年代もYouTubeの解説動画の定番で、声を聞けば誰でも分かる。',
+          ['ゆっくり解説', 'ゆっくり霊夢・ゆっくり魔理沙'], 'ゆっくりの声、何分まで聞いていられる？'],
+        ['どうしてこうなった', '2009', 'live', '失敗や想定外の結果に添える一言。今でも普通に通じる。',
+          '2009年ごろ、2chで「どうしてこうなった」と歌いながら踊るAAが流行し、ニコ動の替え歌で広まった。収拾がつかない状況の決まり文句として、今も幅広く使われる。',
+          ['気づいたら朝。どうしてこうなった', 'どうしてこうなった どうしてこうなった ♪'], '人生で一番「どうしてこうなった」な瞬間は？'],
+        ['リア充爆発しろ', '2007頃', 'live', '現実が充実している人への嫉妬をネタにした言葉。',
+          '「リア充」は2005年ごろ2chの大学生活板で生まれた「リアル（現実）が充実している人」。「爆発しろ」とセットで2007〜2008年に広まり、クリスマスや花火大会の夜に必ず書かれる言葉になった。',
+          ['カップル、爆発しろ', 'リア充になりたい'], 'クリスマスの夜、ネットで何してた？'],
+        ['wktk（ワクテカ）', '2006頃', 'cult', '「ワクワクテカテカ」の略。待ちきれない気持ち。',
+          '2006年ごろ、「ワクワクテカテカ」のローマ字の子音だけを取った略。発表や発売を待つスレで乱舞した。同じ作り方の「ktkr（キタコレ）」「kwsk（詳しく）」とセットで覚えている人が多い。',
+          ['明日発売wktk', 'kwsk（詳しく）'], 'ローマ字の略、ほかに覚えてる？（ktkr、kwsk、gkbr）'],
+        ['俺の嫁', '2007頃', 'cult', '好きなキャラを「嫁」と呼ぶ。今の「推し」の先祖。',
+          '2007年ごろ、好きなアニメやゲームのキャラを「嫁」と呼ぶ言い方がニコ動のコメントで定番化。「〇〇は俺の嫁」「俺の嫁に手を出すな」。今の「推し」にあたる言葉の先祖。',
+          ['〇〇は俺の嫁', '嫁が増えた'], '初めての「嫁」、誰だった？'],
+        ['レッツゴー！陰陽師', '2007', 'dead', '格闘ゲームのおまけ映像がニコ動で大流行。',
+          '2007年、格闘ゲーム「新豪血寺一族 煩悩解放」の挿入歌の映像がニコ動で爆発的に流行。「ドーマン・セーマン」の呪文と踊りが伝染し、ニコ動初期を代表する一本になった。',
+          ['ドーマン・セーマン', 'レッツゴー！陰陽師'], 'ニコ動で最初に見た動画、覚えてる？'],
+        ['アッー！', '2005頃', 'cult', '説明はしづらいが、ネットに長くいる人なら必ず知っている叫び。',
+          '2005年ごろ掲示板で生まれ、ニコ動の替え歌や字幕で広まった叫び声。元ネタの説明は少々しづらいが、ネットに長くいれば必ずどこかで出会う。コメント欄に流れると全員が反応した。',
+          ['アッー！'], '説明はできないけど知ってるネタ、ほかにある？'],
+        ['エアーマンが倒せない', '2007', 'dead', 'ゲームの愚痴を歌にした曲。ニコ動初期のヒット。',
+          '2007年、「ロックマン2」のボス「エアーマン」に勝てない愚痴をそのまま歌にした曲。ニコ動で100万再生を超え、「ゲームの愚痴を歌にする」流れを作った。',
+          ['何回やっても何回やっても'], '倒せなくてあきらめたボス、いる？'],
+        ['( ^ω^) ブーン系', '2005頃', 'dead', '顔文字「ブーン」が主人公の長編物語（SS）が掲示板で流行。',
+          '2005年ごろ、「( ^ω^)ブーン」の顔文字が主人公の小説（SS）が2chのVIP板で流行。「( ^ω^)が〇〇するようです」というタイトルで、職人が長編を書き継いだ。',
+          ['( ^ω^)…', '( ^ω^)が勇者になるようです'], '掲示板で物語を読んでた人、いる？',
+          '( ^ω^)ブーン'],
+        ['ちょっと通りますよ', '2005頃', 'dead', '通りすがりの写真や投稿に添える決まり文句。ゆるい時代の空気。',
+          '2005年ごろ、画面を横切るだけのAA（牛や猫が有名）に添えられた文句。「ごめんよ、ちょっと通りますよ」。話の流れに関係なく通り過ぎる、ゆるい時代の2chを象徴する。',
+          ['　　ちょっと通りますよ　　（´・ω・）'], 'ゆるかった頃のネットで、一番好きだったネタは？']
+      ],
+      world: [['2005', 'チャック・ノリス・ファクト（最強ネタ）'], ['2006', 'LOLcat（変な英語をしゃべる猫画像）'], ['2007', 'リックロール（だまして動画に飛ばす）']]
+    },
+    {
+      id: 'e3', years: '2010-2014', title: 'ツイッター・スマホ時代', short: 'ツイッター期',
+      lead: '手のひらにネットが来た。短い言葉が一晩で全国に広まるようになった頃。',
+      age: { title: 'ツイッター初期世代。2010年代前半に目覚めた人', sub: '「なう」を本気で使っていた世代。隠さなくて大丈夫、みんなやってました。' },
+      items: [
+        ['草', '2010頃', 'live', '「ｗｗｗ」が草に見えることから。歴代もっとも長く広く使われている笑いの言葉。',
+          '笑いを表す「ｗ」（warau）を並べた「ｗｗｗ」が草が生えて見えることから「草生える」。2010年ごろに広まり、2013年前後には「草」一文字で定着。「草不可避」「大草原」など派生も多い。',
+          ['それは草', '草不可避', '大草原不可避'], '「ｗ」派？「草」派？「笑」派？'],
+        ['ワンチャン', '2011頃', 'live', '「ワンチャンス」の略。もしかしたら。',
+          '麻雀用語の「ワンチャンス」が元。2011年ごろから大学生を中心に「もしかしたら行けるかも」の意味で広まり、2013年の流行語大賞の候補にもなった。今は「ワンチャンある」が普通の日本語。',
+          ['ワンチャンある', 'ワンチャン行けるか'], 'ワンチャンで本当に行けたこと、ある？'],
+        ['それな', '2013頃', 'live', '強い同意。短くて便利なので今も現役。',
+          '2013年ごろ、女子中高生の間で広まった強い同意の一言。関西弁の「せやな」が元とも言われる。「それな」で会話が終わる便利さで、大人にも定着した。',
+          ['それな', 'それなすぎる'], '若者言葉で、大人になっても抜けないやつは？'],
+        ['〜なう', '2010頃', 'dead', 'ツイッターで「今これをしている」と報告する語尾。',
+          '2010年、ツイッターが日本で広まった年。英語のnowをつけて「渋谷なう」のように今の状況を報告した。流行語大賞のトップ10入り。過去形の「わず（was）」もセット。今使うと確実に時代がばれる。',
+          ['渋谷なう', '風呂わず'], '「なう」、最後に使ったのいつ？'],
+        ['激おこぷんぷん丸', '2013', 'dead', '怒りの段階を表す言葉遊び。短命だが記憶には強く残った。',
+          '2013年、女子高生発の「怒りの段階」の言葉遊び。おこ→まじおこ→激おこぷんぷん丸→ムカ着火ファイヤー→カム着火インフェルノォォォ。テレビで紹介されて一気に広まり、一気に古びた。',
+          ['ガチで激おこぷんぷん丸', 'ムカ着火ファイヤー'], '怒りの段階、全部言える？'],
+        ['バカッター', '2013', 'cult', '悪ふざけ写真の投稿で店が閉まる騒ぎが連続。「炎上」が日常語になった年。',
+          '2013年の夏、アルバイトが店の冷蔵庫に入る写真などを投稿し、店が閉店に追い込まれる騒ぎが連続。「バカ＋ツイッター」。ネットの「炎上」が社会問題として広く認識された年だった。',
+          ['またバカッターか'], 'ネットの黒歴史、ちゃんと消せた？'],
+        ['壁ドン', '2014', 'dead', '少女マンガの定番ポーズがテレビとネットで大流行。',
+          '2014年、少女マンガの定番シーン「壁に手をついて迫る」がテレビとネットで大流行し、流行語大賞のトップ10に。なお元は「隣の部屋の騒音に壁を叩く」意味の言葉だった。',
+          ['壁ドンされたい', '壁ドン（隣がうるさい方）'], '壁ドン、現実でやられたらどう思う？'],
+        ['ステマ', '2012', 'live', 'ステルスマーケティング。宣伝だと隠した投稿への疑いの目。',
+          '2012年、飲食店のランキングサイトのやらせ投稿や、芸能人のブログでの商品紹介が問題になり広まった。「ステルスマーケティング」の略。2023年に景品表示法で規制対象になり、今はむしろ重要な言葉。',
+          ['これステマだろ', 'ステマ乙'], '宣伝だと分かる投稿と分からない投稿、見分けられる？'],
+        ['ドヤ顔', '2010頃', 'live', '得意げな顔。関西弁の「どや」から。',
+          '関西弁の「どや（どうだ）」から。2010年ごろ、芸人の決め顔を指す言葉としてテレビとネットで広まり、流行語の候補に。今は「ドヤる」と動詞にもなっている。',
+          ['ドヤ顔で言うな', 'ドヤってる'], '人生最高のドヤ顔、いつだった？'],
+        ['ジワる', '2013頃', 'live', 'じわじわ笑いがくる。「草」ほど強くない笑いの表現。',
+          '2013年ごろ、「じわじわ来る」の略。見た瞬間は笑えないが、あとから効いてくる面白さ。「草」より控えめな笑いとして使い分けられる。',
+          ['このイラストじわる', 'じわじわくる'], 'ジワる画像、スマホに入ってる？']
+      ],
+      world: [['2011', 'ニャンキャット（虹を出して飛ぶ猫）'], ['2013', 'Doge（柴犬と変な英語）／ハーレムシェイク'], ['2014', 'アイスバケツチャレンジ']]
+    },
+    {
+      id: 'e4', years: '2015-2019', title: 'インスタ・動画配信時代', short: 'インスタ期',
+      lead: '写真と短い動画で「映え」を競う。推しを応援する文化が言葉を作った頃。',
+      age: { title: 'インスタ世代。2010年代後半に育った人', sub: '「ぴえん」と「尊い」を両方使えるなら、この世代のど真ん中です。' },
+      items: [
+        ['ぴえん', '2018頃', 'live', '泣きそうな気持ち。泣き顔の絵文字とセット。',
+          '2018年ごろからの若者言葉。うるうるした目の絵文字とセットで、悲しいときにも嬉しいときにも使える。2019年の女子高生流行語で1位。「ぴえん超えてぱおん」へ発展した。',
+          ['財布忘れた、ぴえん', 'ぴえん超えてぱおん'], 'ぴえんの正しい使い方、説明できる？'],
+        ['エモい', '2016頃', 'live', '感情を揺さぶられる感じ。なんでも「エモい」で済ませられる便利さで定着。',
+          '英語のemotionalが元。音楽のジャンル名としては2000年代からあったが、2016年ごろから「感情が動く・懐かしい・切ない」を一語で言う言葉として一般化。2016年の新語大賞で2位。',
+          ['夕方の空、エモい', 'この曲エモすぎ'], '「エモいって何？」と聞かれたら、説明できる？'],
+        ['尊い', '2017頃', 'live', '推しがありがたすぎて拝むしかない気持ち。',
+          '元は「身分が高い・ありがたい」という古い言葉だが、2017年ごろから推しに対する「ありがたすぎて拝む」感情として定着。配信界隈の「てぇてぇ」はこの変化形。',
+          ['尊い…', '尊死（尊すぎて死ぬ）'], 'あなたの「尊い」は誰？'],
+        ['〜しか勝たん', '2019頃', 'live', '「これが一番」の言い方。「推ししか勝たん」。',
+          '2019年ごろ、「〇〇しか勝たん＝〇〇が一番」。元はアイドルファンの言葉で、2020年の女子中高生流行語で1位に。食べ物にも予定にも何にでも付けられる。',
+          ['推ししか勝たん', '寝るのしか勝たん'], '今日「しか勝たん」もの、何？'],
+        ['バズる', '2016頃', 'live', '投稿が爆発的に広まる。今はテレビでも普通に使う。',
+          '英語のbuzz（ざわめき）から。2010年代前半は宣伝業界の言葉だったが、2016年ごろに一般化し、2018年ごろにはテレビでも普通に使われるようになった。',
+          ['ツイートがバズった', 'バズり待ち'], 'バズったことある？ 一番伸びた投稿は？'],
+        ['インスタ映え', '2017', 'dead', '写真で見ばえする、の意味。流行語大賞を取ったが今は少し古い響き。',
+          '2017年の流行語大賞。写真で見栄えすること。食べ物や観光地に「映え」という価値が生まれた。2020年ごろから「映え疲れ」が言われ、今は少し古い響きになっている。',
+          ['映えるカフェ', '映え狙い'], '映えのために料理が冷めたこと、ある？'],
+        ['り／りょ', '2016頃', 'dead', '「了解」をどんどん短くした結果。一文字で返事。',
+          '2016年ごろ、「了解」→「りょ」→「り」。LINEの返事を一文字まで短くした。2016年の女子高生流行語。大人が使うと「冷たい」と受け取られることも。',
+          ['「明日10時」「り」'], '「り」で返されたら腹立つ？ 平気？'],
+        ['推し活', '2019頃', 'live', '推しを応援する活動全般。生活の中心になった人も多い。',
+          '「推し」自体は2000年代のアイドルファン用語。2019年ごろから「推し活」として、グッズ・遠征・配信視聴など生活全体の活動を指すようになり、2021年の流行語大賞の候補に。',
+          ['推し活のために働いてる', '推し活貯金'], '推し活に月いくら使ってる？'],
+        ['やばたにえん', '2018', 'dead', '「やばい」の語呂遊び。短命だった若者語の代表。',
+          '2018年ごろ、「やばい」＋「永谷園」の語呂。女子高生流行語に入ったが、流行は短かった。語呂合わせ系の若者語の代表として記憶されている。',
+          ['テスト明日とかやばたにえん'], '語呂合わせの若者言葉、ほかに覚えてる？'],
+        ['あざまる水産', '2018', 'dead', '「ありがとう」の語呂遊び。これも短命。',
+          '2018年の女子中高生流行語。「あざっす（ありがとう）」＋「まる」＋居酒屋チェーンの名前の語呂。これも短命だったが、言った瞬間に時代が特定できる。',
+          ['ありがとう → あざまる水産'], '本気で使ってた人、正直に手を挙げて。']
+      ],
+      world: [['2017', 'よそ見する彼氏（Distracted Boyfriend の写真）'], ['2018', 'フロスダンス'], ['2019', '女性が猫に怒鳴る画像（Woman Yelling at a Cat）']]
+    },
+    {
+      id: 'e5', years: '2020-2026', title: 'ショート動画・AI時代', short: 'ショート期',
+      lead: '15秒の動画と生成AI。元ネタがどこから来たのか追えないほど速くなった今。',
+      age: { title: '今どき世代。2020年代のネットで育った人', sub: 'ショート動画のテンポで生きている世代。来年にはもう別のミームが来ます。' },
+      items: [
+        ['〜ってコト!?', '2022', 'live', '人気キャラのセリフが口癖に。語尾につけるだけで雰囲気が出る。',
+          '2022年、人気マンガ「ちいかわ」のキャラ・ハチワレが驚いたときに言うセリフ。語尾につけるだけで雰囲気が出るため、SNSで日常の驚きに使われる。',
+          ['もう金曜日ってコト!?', '給料これだけってコト!?'], '語尾に「ってコト!?」をつけて一番面白くなる文、考えて。'],
+        ['それってあなたの感想ですよね', '2021頃', 'live', '論破の決まり文句が小学生の流行語に。言い返しの定番。',
+          '掲示板の創設者がテレビ番組で言った一言が、2021年に切り抜き動画で広まり、2022年の小学生流行語で1位に。学校で言い返しの定番になり、先生が困ったと話題になった。',
+          ['それってあなたの感想ですよね', 'なんかそういうデータあるんですか？'], 'これ言われたら、何て返す？'],
+        ['蛙化現象', '2023', 'live', '好きだった人のささいな行動で急に冷める現象。',
+          '元は心理学の言葉（好かれた途端に相手が嫌になる現象）だが、2023年に「好きな人のささいな行動で冷める」意味に広がり、女子高生流行語で1位。「フードコートでトレーを持ってきょろきょろする姿」が代表例。',
+          ['小走りで蛙化', 'フードコートで蛙化'], '蛙化した瞬間、ある？ 言える範囲で。'],
+        ['知らんけど', '2022', 'live', '関西発の責任回避の語尾。全国に広まった。',
+          '関西では昔からある「言っておいて責任は取らない」語尾。2022年の流行語大賞のトップ10入りで全国に広まり、関西以外の人も使うようになった。',
+          ['明日雨らしいよ、知らんけど'], '関西の人に聞きたい。「知らんけど」、昔から言ってた？'],
+        ['猫ミーム', '2024', 'cult', '猫の動画をつなげて自分の日常を語る形式。世界中で同じ猫たちが使われた。',
+          '2024年1月ごろ、海外発の猫の動画（踊る猫、バナナの着ぐるみの猫など）をつないで自分の日常やバイトの愚痴を語る形式がTikTokで爆発。世界中の人が同じ猫たちを使った。',
+          ['上司に怒られた時の私（猫が走る）', 'ハッピーハッピーハッピー'], '猫ミームで一番好きな猫は？'],
+        ['界隈', '2024', 'live', '「〇〇界隈」。趣味の仲間うちを指す言葉が若者語として再流行。',
+          '2024年の女子中高生流行語で1位。もともと「その周辺の人たち」の意味だが、「風呂キャンセル界隈」「二度寝界隈」のように自虐的に使う形で再流行した。',
+          ['風呂キャンセル界隈', '二度寝界隈'], 'あなたは何界隈？'],
+        ['きまZ', '2022', 'dead', '気まずい、をZで表す。短命。',
+          '2022年ごろ、「気まずい」をZ世代風に書いた言葉。テレビで「Z世代の流行語」として紹介されたが、本当に使っていた人がどれだけいたかは怪しい。短命の代表。',
+          ['元カレに会った、きまZ'], 'Z世代語、ほかに言える？'],
+        ['なぁぜなぁぜ？', '2023', 'dead', '疑問を間延びさせて言う。テレビで広まり、一気に古くなった。',
+          '2023年、TikTokで新人社会人が世の中の理不尽を「なぁぜなぁぜ？」と間延びして問いかける動画から。テレビで繰り返し紹介され、その年のうちに古くなった。',
+          ['働いても給料上がらないの、なぁぜなぁぜ？'], 'あなたの「なぁぜなぁぜ？」は何？'],
+        ['ミャクミャク', '2025', 'cult', '大阪・関西万博の公式キャラ。不気味さが逆にネットで愛された。',
+          '2025年の大阪・関西万博の公式キャラクター。2022年の発表時は「不気味」「怖い」と言われたが、開催が近づくにつれて逆に愛され、グッズが品切れに。ネットでは「ミャクミャク様」と呼ばれた。',
+          ['ミャクミャク様', 'ミャクミャクのぬいぐるみ争奪戦'], 'ミャクミャク、最初に見たときどう思った？'],
+        ['AIで作りました', '2023頃', 'live', '生成AIの画像・音声・動画が当たり前に。「これAI？」が合言葉になった。',
+          '2022年末に対話AIと画像生成AIが一般に広まり、2023年以降「これAI？」が合言葉に。AI画像の指の数を数えて見破るのが遊びになり、AIの歌声やAI動画も日常の一部になった。',
+          ['この画像AIっぽくない？', '指が6本ある'], 'AIに最初に聞いたこと、覚えてる？']
+      ],
+      world: [['2021', 'バーニー・サンダースのミトン（手袋の写真）'], ['2023', 'NPC配信／Skibidi Toilet'], ['2024', 'very demure, very mindful']]
+    }
+  ];
+  var ST = { live: '現役', dead: '死語', cult: '通好み' };
+  var ANS = ['知らない', '知ってる', '使ってた'];
+
+  /* ---------- ネタ札：状況の再現 ----------
+     real:true = 言葉がそのまま本物。 real:false = イメージ（パチモン）＋ツッコミ札(st) */
+  function P(x, y, s, c) { /* 人のシルエット */
+    return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')" fill="' + (c || 'var(--fg)') + '"><circle cx="0" cy="-34" r="12"/><path d="M-14,-18h28a6,6 0 0 1 6,6v40h-10v30h-8v-30h-4v30h-8v-30h-10v-40a6,6 0 0 1 6,-6z"/></g>';
+  }
+  function CEN(x, y, w, h, t) { /* 黒帯 */
+    return '<g><rect class="censor" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2"/>' +
+      (t ? '<text class="censor-t" x="' + (x + w / 2) + '" y="' + (y + h / 2 + 4) + '" text-anchor="middle">' + t + '</text>' : '') + '</g>';
+  }
+  function CAT(x, y, s, c) { /* 猫のシルエット */
+    return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')" fill="' + (c || 'var(--fg)') + '"><ellipse cx="0" cy="10" rx="26" ry="16"/><circle cx="-22" cy="-6" r="13"/><path d="M-33,-12l-2,-14l10,8z M-11,-12l2,-14l-10,8z"/><path d="M24,6q18,-10 14,-30" stroke="' + (c || 'var(--fg)') + '" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="-16" y="20" width="6" height="12" rx="3"/><rect x="6" y="20" width="6" height="12" rx="3"/></g>';
+  }
+  function BUB(x, y, w, h, t, fs) { /* ふきだし */
+    return '<g><rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="10" fill="#fff" stroke="var(--fg)" stroke-width="2"/><path d="M' + (x + 20) + ',' + (y + h) + 'l6,12l10,-12z" fill="#fff" stroke="var(--fg)" stroke-width="2"/><rect x="' + (x + 21) + '" y="' + (y + h - 2) + '" width="14" height="4" fill="#fff"/><text x="' + (x + w / 2) + '" y="' + (y + h / 2 + (fs || 14) / 3) + '" text-anchor="middle" font-size="' + (fs || 14) + '" font-weight="700" fill="#111">' + t + '</text></g>';
+  }
+  function SVG(inner, vb) { return '<svg viewBox="' + (vb || '0 0 320 180') + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">' + inner + '</svg>'; }
+  function TXT(x, y, t, fs, c, extra) { return '<text x="' + x + '" y="' + y + '" font-size="' + (fs || 14) + '" fill="' + (c || 'var(--fg)') + '" ' + (extra || '') + '>' + t + '</text>'; }
+  var BG = '<rect width="320" height="180" fill="var(--surface2)"/>';
+
+  /* トピック：解説（成り立ち）とは別に、その後の話・周辺の小ネタ・今の扱い */
+  var TOPIC = {
+    'e1:0': ['横棒の数は決まっていない。興奮度に合わせて好きなだけ伸ばすのが作法で、長すぎて改行される書き込みもあった', '顔の部分を入れ替えた派生が大量にある。「キタ━━(・∀・)━━!!」「キタワァ*・゜ﾟ･*:.｡..｡.:*･゜(n‘∀‘)η゜･*:.｡. .｡.:*･゜ﾟ･*」など', '今の「キター」は口で言う言葉として残った。書き込みで横棒まで付ける人は、ほぼ当時を知っている人'],
+    'e1:1': ['兄弟のような顔文字が多い。泣く「(´；ω；`)ブワッ」、決める「(｀・ω・´)シャキーン」、拗ねる「(´・ω・｀)」の全角版', 'LINEスタンプにも同じ顔のものが多数あり、顔文字を知らない世代にも「あの顔」として通じる', '「ω」は本来ギリシャ文字のオメガ。日本のネットでは口の形としての使い道の方が有名になった'],
+    'e1:2': ['返さないと気持ち悪い、という人が今もいる。SNSで「ぬるぽ」と書くと、知らない人から「ガッ」が飛んでくる', 'プログラマーの間では今も通じる。会社のチャットで「ぬるぽ」と書くとエンジニアの年齢層が分かる、という話も', '元のエラーは今も現役で、Javaを学ぶと最初に出会う'],
+    'e1:3': ['モナーの仲間にはギコ猫「(,,ﾟДﾟ)」、しぃ「(*ﾟーﾟ)」、八頭身モナーなどがいて、それぞれ性格が設定されていた', '2005年には音楽会社のキャラ「のまネコ」がモナーに似ているとして大きな騒動になり、ネットの「みんなのもの」を企業が囲い込むことへの反発が表に出た', '「オマエモナー」は英語のネットスラングで言う「you too」の返し。返し言葉がキャラのセリフになったのが珍しい'],
+    'e1:4': ['ドラマ版の主題歌や「エルメス」という呼び名は、原作のスレでは女性を高級ブランドの食器にちなんでそう呼んだのが始まり', 'スレの住人が恋愛を応援する形式は、その後「〇〇するスレ」「実況スレ」として定番になった', '掲示板の書き込みが本になった最初の大ヒット。これ以降、ネット発の書籍化が普通になった'],
+    'e1:5': ['元の文章は飲食店への不満ではなく、店の客層が変わったことへの嘆き。「通」を名乗るオチまで含めて一つの作品', '改変版は、牛丼の部分を別の店や場所に置き換える形が基本。「近所のパチンコ屋」「大学の学食」など', 'コピペ文化はその後「〇〇な俺が通りますよ」「〜で変わる〜」など、構文そのものが遊ばれる方向へ'],
+    'e1:6': ['初期2chには「逝ってよし」「氏ね」「厨房」「藁（わら）」など、わざと字を変えた言葉が多かった。検索や規制を避ける意味もあった', 'ギコ猫はこの言葉以外にも「ゴルァ！」「（゜Д゜）ハァ？」など、怒る役を担当するキャラだった', '今これを使うと「本気で言っている」と受け取られる可能性があるので、ネタとしても使いにくい'],
+    'e1:7': ['夏休みに掲示板が荒れる現象は今も続いていて、「夏休みだなぁ」という言い方に形を変えた', '「〇〇厨」は批判の言葉だが、自分で「私、推し厨なんで」と名乗る使い方も増えている', '似た作り方の言葉に「〜民」「〜勢」「〜界隈」。時代が下るほど、言葉が優しくなっている'],
+    'e1:8': ['文字を大きくするには、HTMLで文字サイズを直接書く必要があった。当時はみんな手打ちで作っていた', 'テキストサイトの管理人が、のちに作家やライターになった例がいくつもある', '今のSNSで「改行を重ねて最後に落ちを書く」投稿は、この大文字芸の子孫といえる'],
+    'e1:9': ['おにぎりのほかに、「マターリ」「モナー音頭」など、みんなで同じAAを貼って盛り上がるネタが多数あった', '「ワッショイ」はもともと祭りのかけ声。ネットでは「意味はないが盛り上がる」という意味の記号になった', '今のネットだと「祭り」や「草」で表されるノリが、当時はAAの連投で表現されていた'],
+    'e2:0': ['声は「SofTalk」という無料ソフトの音声（AquesTalk）。アクセントがない棒読みが、かえってキャラの個性になった', 'ゆっくりの作品は「ゆっくり実況（ゲーム）」「ゆっくり解説（知識）」「ゆっくり茶番劇（寸劇）」に分かれ、今もYouTubeの一大ジャンル'],
+    'e2:1': ['言葉そのものは普通の日本語なので、ネットの外でも使われる。ニュースの見出しや本のタイトルにも', '歌とAAを知っているか、言葉だけ知っているかで、ネット歴がうっすら分かる'],
+    'e2:2': ['「リア充」の反対語として「非リア」「ぼっち」も同時期に広まった', 'クリスマスの夜に「爆発しろ」と書き込むのは年中行事になり、今は「今年も書く人いるな」と眺められる側に', '2010年代後半には「リア充アピール」「陽キャ」に言い換わり、今は「リア充」自体がやや古い'],
+    'e2:3': ['同じ作りの略語は多数。ktkr（キタコレ）、kwsk（詳しく）、gkbr（ガクブル）、ggrks（ググれカス）、wktk の仲間', 'ローマ字の子音だけで書くのは、日本語入力を切り替えずに素早く書けるから。掲示板向きの発明だった', '今の若者語「りょ」「それな」とは方向が逆で、略しているのに読みにくいのが当時らしい'],
+    'e2:4': ['「嫁」の対義語として「俺の娘」「俺の妹」もあった。関係性を家族に例える言い方が流行した', '2010年代後半に「推し」が主流になると、「嫁」はやや重い言い方として使われなくなっていった', 'コメントで「俺の嫁」と書いて「嫁が増えた」と返す流れは、今の「〜しか勝たん」に近い'],
+    'e2:5': ['「ドーマン・セーマン」は実在する呪文の名前。陰陽道の九字と五芒星のこと', 'ニコ動初期は「中毒性があって何回も見てしまう」動画がランキング上位を占め、これはその筆頭だった', 'この曲で初めて東方や音MADに触れた人も多く、「ニコ動の入口」として語られる'],
+    'e2:6': ['コメント欄で一斉に同じ言葉が流れる「弾幕」の文化と相性がよく、タイミングを合わせて流すのが遊びだった', '元ネタの説明がしづらい言葉は他にもあり、「知っているけど人には説明できない」のがネットの古参あるある', '今のネットでは使いどころが難しく、ほぼ思い出の中の言葉になっている'],
+    'e2:7': ['エアーマンは実際に初心者が苦戦するボスとして有名で、曲の内容が多くの人の実体験と一致した', '「替え歌・自作曲で愚痴る」流れは、その後ボーカロイド曲や「歌ってみた」につながった', 'ゲーム自体は今も新作が出ているシリーズで、この曲をきっかけに原作を遊んだ人もいる'],
+    'e2:8': ['長編の中には数年かけて完結したものや、未完のまま止まったものもあり、まとめサイトで今も読める', '顔文字を主人公にするアイデアは、のちの「やる夫スレ」（AAキャラで歴史や知識を解説する形式）に受け継がれた', '「〜ようです」というタイトルの付け方は、この文化の名残'],
+    'e2:9': ['「牛」が通るのが一番有名だが、猫や謎の生き物が通るバリエーションもあった', 'スレの流れを止めるのが目的ではなく、場を和ませるために使われた。喧嘩中のスレによく現れた'],
+    'e3:0': ['派生の多さが特徴。「草生える」「大草原」「草不可避」「草を禁じ得ない」「芝」「森」など、笑いの強さで植物が育つ', '英語圏の「lol」に相当するが、日本では「w」と「草」が共存していて、世代や場所で使い分けられる', '今は口で「草」と言う人もいて、文字から生まれた言葉が話し言葉になった珍しい例'],
+    'e3:1': ['麻雀では「残り1枚で上がれるかも」という意味。それが「一か八か」「もしかしたら」に広がった', '「ワンチャンある」「ワンチャンない」のどちらにも使えるのが便利さの理由', '犬の「わんちゃん」と同じ音なので、文字で書くと一瞬まぎらわしい。それもネタにされた'],
+    'e3:2': ['同意の言葉は短くなる傾向がある。「そうだね」→「それな」→「な」まで縮めた使い方もある', '「それなすぎる」「それな案件」など、強調の形がいくつもできた', '会話を終わらせる力が強いので、「それな」で返されると話が続かない、という悩みも生んだ'],
+    'e3:3': ['「なう」は英語のnowをそのまま日本語の語尾にした珍しい例。「わず（was）」「うぃる（will）」の三点セット', '位置情報と一緒に「〇〇なう」と投稿するのが流行だった', '今あえて使うと「ネタで言っている」と分かってもらえる程度には有名な死語'],
+    'e3:4': ['5段階の上に「げきおこスティックファイナリアリティぷんぷんドリーム」という冗談の最上級もあった', 'テレビが「女子高生の流行語」として一斉に紹介すると寿命が縮む、という現象の代表例として語られる', '「おこ」単体は今も使われていて、「ぷんぷん丸」まで言うと時代がばれる'],
+    'e3:5': ['この年以降、多くの企業がアルバイト向けのSNS研修を始め、就業規則にSNSについての項目を入れるようになった', '学校の「情報モラル」の授業で、投稿が店の閉店や損害賠償につながった事例として取り上げられることが多い', '2019年にも同じ種類の投稿が相次ぎ、「バイトテロ」という言葉で再び社会問題になった。スクショが残るので「消せば終わり」にならない、という教訓が広まった'],
+    'e3:6': ['派生として「顎クイ」「床ドン」「肩ズン」など、少女マンガ由来のポーズが次々に名前を付けられた', '壁ドンをしてもらえるイベントや、壁ドンを体験できる展示が実際に開催された', '「隣がうるさいときに壁を叩く」方の意味は今も生きていて、文脈で判断するしかない'],
+    'e3:7': ['2012年の騒動は、芸能人がブログで紹介した商品が実は依頼だった、というもので、複数の芸能人が謝罪した', '2023年10月からは法律で規制され、宣伝なのに「PR」と書かないと違反になった。「#PR」「#広告」の表記はこの影響', 'インフルエンサーの案件投稿が当たり前になった今、「ステマ」という言葉の重みはむしろ増している'],
+    'e3:8': ['元は関西の芸人が使っていた言い方で、テレビを通じて全国に広まった', '「ドヤ顔」から「ドヤる」「ドヤ」と単独で使う形に発展し、今はほぼ普通の日本語', '英語圏の「smug face」に近いが、日本語の方が軽くて使いやすい'],
+    'e3:9': ['「じわる」は、見た瞬間に笑う「草」と、あとから効いてくる「じわる」の使い分けができるのが便利', '画像つきの投稿に添えることが多く、「何がじわるのか」を探す楽しみも含んでいる', '若者語に見えるが、今は幅広い年代に通じる。若者語が定着した成功例'],
+    'e4:0': ['🥺の絵文字が2018年にスマホに追加されたことが、流行を後押しした。言葉と絵文字が同時に広まった', '2020年ごろには「ぴえん系」というファッションや化粧の呼び名にもなり、言葉の範囲が広がった', '「ぴえん」と言いながら泣いている人はいない。感情を軽く見せるための言葉として使われる'],
+    'e4:1': ['「エモい」の使い方は人によってばらつきが大きく、「結局どういう意味？」という議論が定期的に起きる', '写真の加工アプリで「エモい」仕上がりにするフィルターが人気になり、見た目のジャンル名にもなった', '古い日本語の「あはれ」「いとをかし」に近いと説明されることがあり、国語の授業の例に使われたことも'],
+    'e4:2': ['「尊い」の勢いが強すぎると「尊死」「語彙力が死ぬ」「無理」と、言葉を失う表現に移る', '推しに手を合わせる「拝む」ポーズとセットで使われることが多い', '元が仏教や皇室に使う重い言葉なので、年配の人が最初に聞くと驚く、という話がよくある'],
+    'e4:3': ['元は「〇〇に勝てるものはない」の意味で、アイドルの現場で使われていた言い方', '「推ししか勝たん」から広がって、「寝るのしか勝たん」「給料日しか勝たん」など何にでも付くようになった', '2020年の流行語になったあと、2〜3年で使う人が減った。寿命が短めの若者語'],
+    'e4:4': ['「バズる」は良い意味でも悪い意味でも使えるが、悪い方は「炎上」と使い分けられることが多い', '「バズったので宣伝」という定型文が生まれ、バズった投稿の返信欄で自分の作品や店を紹介する文化ができた', '「プチバズ」「微バズ」「バズり待ち」など、規模を表す派生も増えた'],
+    'e4:5': ['「映え」の影響で、カフェやホテルが写真を撮りやすい内装にする、という変化が実際に起きた', '「映え」を優先して食べ物を残す、危険な場所で撮影する、といった問題も同時に話題になった', '今は「映え」より「エモい」「チル」が優先される流れで、インスタ映え自体はやや古い言葉に'],
+    'e4:6': ['「り」より短くはできないので、これが短縮の限界。次に来たのは「了解」のスタンプで返す文化', '職場で「り」と返すと失礼とされる一方、仲間内では「りょ」でも長い、という感覚の差がある', '2016年ごろの女子高生の言葉は、省略系（り、まじ卍）と語呂合わせ系（やばたにえん）の二本立てだった'],
+    'e4:7': ['推し活にかかる金額は「推し活費」と呼ばれ、家計簿アプリに項目ができるほど一般化した', '「推しが尊い」「推しが生きてる」「推しのいる生活」など、推しを主語にした言い回しが大量に生まれた', '2021年の流行語大賞候補になったあとも使われ続けていて、若者語としては長寿'],
+    'e4:8': ['語呂合わせ系の若者語は、企業がそのまま広告に使ったことで一気に「大人が使う言葉」になり、若者が離れた', '同じ年の語呂合わせ系に「あざまる水産」「すこ」「卍」などがあり、2018年はこの手の言葉が多かった', '「やばたにえん」の「たにえん」に意味はない。語感だけで選ばれた言葉で、意味を聞かれても誰も答えられないのが特徴'],
+    'e4:9': ['返事の「よいちょまる」とセットで覚えられている。「よい＋ちょ（ちょっと）＋まる」', '語尾に「まる」を付けるのは「ありがとうまる」のように文末の「。」を読んだのが元、とされる', 'この手の言葉はテレビで紹介されると急に古くなる、というパターンの代表例'],
+    'e5:0': ['ハチワレの口ぐせは他にも「なんとかなれーッ」などがあり、どれも語尾や勢いを借りて日常に使われる', 'マンガ自体が大人の読者に広がり、「かわいいのに話がつらい」というギャップが話題になった', '「ってコト!?」をつけると、どんなに嫌な報告でも少し笑いになる、という使い方が定番'],
+    'e5:1': ['セットで広まった言葉に「なんかそういうデータあるんですか？」「嘘つくのやめてもらっていいですか？」がある', '小学生が真似して使い、先生が困った、というニュースが2022年に相次いだ', '「論破」自体が流行語になり、ディベート風のやりとりが遊びとして広まった年だった'],
+    'e5:2': ['「蛙化」の反対で、嫌いだった人を急に好きになる「蛇化現象」という言葉も2023年に生まれた', '「小走り」「フードコートで席を探す」「店員への態度」など、冷めるきっかけの具体例がSNSで大量に共有された', '本来の心理学の意味とずれて広まったので、心理学の専門家が「それは蛙化ではない」と解説する記事も出た'],
+    'e5:3': ['関西では「知らんけど」の前にかなり断定的なことを言うのが正しい使い方。弱い話に付けても効かない', '2022年に流行語に入ったことで、関西以外の人も使うようになり、関西の人から「使い方が違う」と言われる現象が起きた', '責任を取らない語尾として、仕事のチャットで使うと怒られる。使う場面を選ぶ言葉'],
+    'e5:4': ['使われる猫は「ハッピーハッピー」「バナナキャット」「走る猫」など、それぞれに名前と役割がある', '日本では2024年1〜2月に爆発的に流行し、企業の宣伝にも猫ミーム風の映像が使われた', '動画の素材が共通なので、言葉が分からなくても海外の猫ミームが理解できる。世界共通の型'],
+    'e5:5': ['「風呂キャンセル界隈」は「お風呂に入るのが面倒で先延ばしにする人たち」の意味で、自虐として広まった', '「〜界隈」は本来「その周辺の人たち」の意味で、芸能界隈、オタク界隈など昔からある言葉', '自分の弱点を「界隈」と呼ぶことで仲間がいる感じになる、という使い方が2024年の特徴'],
+    'e5:6': ['同じ時期に「Z世代の流行語」として紹介された言葉には、本当に流行ったものと、そうでもないものが混ざっている', '「〜Z」の形はほかに広がらなかった。「気まずい」を縮める需要が、そもそも薄かったと思われる', '「テレビが若者語を作る」現象は昔からあり、激おこぷんぷん丸のころから繰り返されている'],
+    'e5:7': ['元の動画は「新入社員が会社の理不尽を可愛く聞く」という設定で、聞き方の可愛さが肝だった', '上司世代が「それはね」と真面目に答える返し方も流行り、世代間のやりとりのネタになった', 'TikTok発の流行語は寿命が短く、1年以内に「もう古い」と言われるのが普通になっている'],
+    'e5:8': ['名前の「ミャクミャク」は公募で決まった。「脈々と受け継ぐ」の意味', '発表当初は「怖い」「気持ち悪い」の声が多かったが、万博が近づくと「見慣れた」「かわいく見えてきた」に変わった。慣れで評価が変わった例', '公式グッズのぬいぐるみやキーホルダーは品切れが相次ぎ、転売が問題になった'],
+    'e5:9': ['AI画像の見分け方として「指の本数」「文字がおかしい」「背景の人が溶けている」が有名になった。今は改善されて見分けにくい', '「AIで作りました」と書く投稿と、書かない投稿の区別が問題になり、表示を義務づける動きが各国で進んでいる', 'AIの声で歌わせる、AIで動画を作る、AIと会話する、が2023年から2〜3年で日常になった']
+  };
+
+  var VIS = {
+    /* ---- 1999-2004 ---- */
+    'e1:0': { k: 'bbs', real: true, t: '【速報】新作、ついに正式発表', p: ['公式きたあああああ', 'キタ━━━━━━(゜∀゜)━━━━━━ !!!!!', 'キタ━(゜∀゜)━!', 'キターーーーーーーーーー', '仕事中なのに声出た'] },
+    'e1:1': { k: 'bbs', real: true, t: '今月あと3000円で生きる', p: ['(´・ω・`)ショボーン', '(´・ω・`)人(´・ω・`)ﾅｶｰﾏ', 'もやし買ってこい', '(´・ω・`)もやしも高い'] },
+    'e1:2': { k: 'bbs', real: true, t: 'Javaのエラーが消えないんだが', p: ['ぬるぽ', { pre: '　（　・∀・）　　　|　|　ガッ\n　と　　　　）　 　 |　|\n　　Ｙ　/ノ　　　　人\n　　　/　）　　 　 <　　>__Λ∩\n　＿/し\'　／／. Ｖ｀Д´）/\n　（＿フ彡　　　　　　　/　←>>1' }, 'ガッ', '様式美'] },
+    'e1:3': { k: 'bbs', real: true, t: 'こんな時間に2ch見てる奴って暇人だろ', p: [{ pre: '　　∧＿∧\n　（　´∀｀）＜　オマエモナー\n　（　　　　）\n　｜ ｜　|\n　（＿_）＿）' }, 'オマエモナー', '>>1 ブーメラン'] },
+    'e1:4': { k: 'scene', real: false, svg: SVG(
+      '<rect width="320" height="180" fill="#20242b"/>' +
+      /* 車内 */
+      '<rect x="0" y="0" width="320" height="180" fill="#d9d4c7"/><rect x="0" y="0" width="320" height="22" fill="#b9b3a4"/><rect x="0" y="22" width="320" height="4" fill="#8e887a"/>' +
+      '<g fill="#8fb3c9"><rect x="14" y="34" width="70" height="52" rx="4"/><rect x="100" y="34" width="70" height="52" rx="4"/><rect x="186" y="34" width="70" height="52" rx="4"/></g>' +
+      '<g fill="#f3f1ea" opacity=".8"><rect x="18" y="38" width="62" height="20"/><rect x="104" y="38" width="62" height="20"/><rect x="190" y="38" width="62" height="20"/></g>' +
+      '<rect x="0" y="96" width="320" height="40" fill="#3c6e8f"/><rect x="0" y="136" width="320" height="44" fill="#9c9484"/>' +
+      '<rect x="0" y="28" width="320" height="3" fill="#333"/><line x1="40" y1="28" x2="40" y2="80" stroke="#333" stroke-width="2"/><line x1="280" y1="28" x2="280" y2="80" stroke="#333" stroke-width="2"/><circle cx="40" cy="82" r="5" fill="#eee" stroke="#333"/><circle cx="280" cy="82" r="5" fill="#eee" stroke="#333"/>' +
+      /* 座席の人（本を読む女性、少し離れて座る男性、間の空席） */
+      '<g fill="#2e2a3a"><circle cx="90" cy="84" r="12"/><path d="M76,98h28a4,4 0 0 1 4,4v36h-36v-36a4,4 0 0 1 4,-4z"/></g><rect x="86" y="108" width="20" height="14" fill="#e9e3d2" transform="rotate(-10 96 115)"/>' +
+      '<g fill="#3a4a2e"><circle cx="230" cy="84" r="12"/><path d="M216,98h28a4,4 0 0 1 4,4v36h-36v-36a4,4 0 0 1 4,-4z"/></g>' +
+      '<g fill="#1b1b1b"><circle cx="262" cy="86" r="11"/><path d="M250,99h24v34h-24z"/></g><rect x="248" y="104" width="30" height="20" fill="#ddd" stroke="#555"/>' +
+      '<text x="158" y="124" text-anchor="middle" font-size="11" fill="#fff">優先席</text>' +
+      /* 吹き出し：スレ */
+      '<g><rect x="104" y="140" width="112" height="30" rx="4" fill="#efefef" stroke="#999"/><text x="110" y="152" font-size="8" fill="#c00" font-weight="700">男達が後ろから撃たれるスレ</text><text x="110" y="164" font-size="8" fill="#333">731 ：Mr.名無しさん ：04/03/14</text></g>') },
+    'e1:5': { k: 'bbs', real: true, t: '吉野家で大変なことになった', p: ['昨日、近所の吉野家行ったんです。吉野家。\nそしたらなんか人がめちゃくちゃいっぱいで座れないんです。\nで、よく見たらなんか垂れ幕下がってて、150円引き、とか書いてあるんです。\n（以下略）', 'そこでまたぶち切れですよ', '通の頼み方はねぎだく', '長い'] },
+    'e1:6': { k: 'bbs', real: true, t: 'ギコ猫について語るスレ 3匹目', p: ['はじめまして！ここって何のスレですか？', { pre: '　　∧∧\n　（　ﾟДﾟ）＜ 逝ってよし\n　／　　|\n～（＿＿）' }, '>>1 スレタイ読め', '>>1 逝ってよし', '初心者に優しくしろよお前ら'] },
+    'e1:7': { k: 'bbs', real: true, t: '夏休みに入ってから板の空気が変わった件', p: ['夏厨うぜえ', '>>1 お前も厨', '懐古厨が一番うざい', '速報厨は仕事しろ'] },
+    'e1:8': { k: 'txs', real: true, capt: '<b>本物</b><span>この書き方そのものが芸。文章は当時風に書き下ろし</span>', sm: ['会社帰り、いつものように牛丼屋に寄った。', 'つゆだくを頼み、紅ショウガを山盛りにし、いざ会計。', 'ポケットに手を入れた瞬間、俺は気づいた。'], huge: '財布が無い。', tail: '店員さんの目が、冷たかった。' },
+    'e1:9': { k: 'bbs', real: true, t: '今日もワッショイするスレ', p: [{ pre: '　　　＼＼　オニギリワッショイ!!　／／\n　＋　　　＼＼　オニギリワッショイ!!　／／　＋\n　　　　　　　▲　　　▲　　　▲\n　＋　　　　／■＼　／■＼　／■＼　　＋\n　　　　　（　´∀｀∩(´∀｀∩)（　´∀｀）\n　　　　　（（　　⊂　）　　ノ　（つ　　丿\n　　　　　　ヽ　（　ノ　（　ヽノ　　（　ヽノ\n　　　　　　（＿）し\'　し(＿)　　し(＿)' }, 'ワショーイ', '意味は特にない'] },
+    /* ---- 2005-2009 ---- */
+    'e2:0': { k: 'nc', real: true, tt: '【ゆっくり茶番劇】今日も茶の間でゆっくり　第12話', sub: '', cm: ['ゆっくりしていってね', 'うｐ乙', 'ゆっくり理解した'], svg: SVG(
+      '<rect width="320" height="180" fill="#c9b97e"/><g stroke="#b3a369" stroke-width="1"><line x1="0" y1="150" x2="320" y2="150"/><line x1="0" y1="165" x2="320" y2="165"/><line x1="160" y1="110" x2="160" y2="180"/></g>' +
+      '<rect x="0" y="0" width="320" height="110" fill="#efe6cf"/><rect x="0" y="104" width="320" height="6" fill="#8b6b45"/>' +
+      '<g fill="#fbf7ec" stroke="#8b6b45" stroke-width="2"><rect x="20" y="16" width="70" height="88"/><rect x="92" y="16" width="70" height="88"/></g><g stroke="#8b6b45" stroke-width="1.5"><line x1="20" y1="45" x2="162" y2="45"/><line x1="20" y1="74" x2="162" y2="74"/><line x1="55" y1="16" x2="55" y2="104"/><line x1="127" y1="16" x2="127" y2="104"/></g>' +
+      '<rect x="190" y="20" width="26" height="70" fill="#fff" stroke="#999"/><text x="203" y="60" text-anchor="middle" font-size="10" fill="#333" writing-mode="tb">和</text>' +
+      '<rect x="236" y="54" width="64" height="44" rx="3" fill="#333"/><rect x="240" y="58" width="56" height="32" fill="#6aa0d8"/><rect x="250" y="98" width="36" height="6" fill="#333"/>' +
+      '<ellipse cx="160" cy="140" rx="70" ry="22" fill="#8b5a2b"/><ellipse cx="160" cy="136" rx="70" ry="22" fill="#a56b35"/>' +
+      '<g><rect x="118" y="124" width="14" height="14" rx="3" fill="#dfe8e0" stroke="#789"/><rect x="190" y="124" width="14" height="14" rx="3" fill="#dfe8e0" stroke="#789"/><circle cx="160" cy="130" r="7" fill="#f4a21c"/><circle cx="150" cy="134" r="6" fill="#f4a21c"/><circle cx="168" cy="136" r="6" fill="#f4a21c"/></g>' +
+      '<rect x="46" y="140" width="60" height="26" rx="6" fill="#b23a48"/><rect x="214" y="140" width="60" height="26" rx="6" fill="#3a5fb2"/>' +
+      BUB(10, 112, 112, 30, 'ゆっくりしていってね!!!', 10) + BUB(198, 112, 112, 30, 'ゆっくりしていってね!!!', 10)) },
+    'e2:1': { k: 'nc', real: true, tt: '作業用BGMのつもりだった', sub: 'どうしてこうなった', cm: ['どうしてこうなった', 'どうしてこうなった', 'wwwwwww', 'どうしてこうなった', '期待して開いた俺が悪い'], svg: SVG('<rect width="320" height="180" fill="#1d2230"/><g fill="#2e3650"><rect x="0" y="130" width="320" height="50"/></g><g stroke="#ffd166" stroke-width="2" fill="none" opacity=".8"><path d="M60,120q10,-30 20,0 M100,120q10,-30 20,0 M140,120q10,-30 20,0 M180,120q10,-30 20,0 M220,120q10,-30 20,0"/></g><g fill="#ffd166"><circle cx="70" cy="90" r="6"/><circle cx="110" cy="90" r="6"/><circle cx="150" cy="90" r="6"/><circle cx="190" cy="90" r="6"/><circle cx="230" cy="90" r="6"/></g>') },
+    'e2:2': { k: 'bbs', real: true, t: 'クリスマスイブの夜に2chにいる奴ｗｗｗ', p: ['リア充爆発しろ', '爆発しろ', '窓の外カップルだらけ。爆発しろ', '俺も爆発したい', 'ケーキ一人で食った'] },
+    'e2:3': { k: 'bbs', real: true, t: '発表まであと10分', p: ['wktk', '(・∀・)wktk', 'ｗｋｔｋが止まらない', 'ktkr？', 'まだー？', 'kwsk'] },
+    'e2:4': { k: 'nc', real: true, tt: '【MAD】俺の嫁集めてみた【総集編】', sub: '', cm: ['俺の嫁', '俺の嫁に手を出すな', 'お前の嫁は俺の嫁', '嫁が増えた', '通報した'], svg: SVG('<defs><linearGradient id="yk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd6e7"/><stop offset="1" stop-color="#c9d9ff"/></linearGradient></defs><rect width="320" height="180" fill="url(#yk)"/><g fill="#fff" opacity=".7"><circle cx="40" cy="40" r="3"/><circle cx="280" cy="30" r="2"/><circle cx="260" cy="150" r="3"/><circle cx="70" cy="150" r="2"/><circle cx="160" cy="20" r="2"/></g><g fill="#6c6f9a" opacity=".55"><circle cx="160" cy="80" r="22"/><path d="M130,104q30,-14 60,0l6,60h-72z"/></g><path d="M100,140 l-8,-8 M220,140 l8,-8" stroke="#fff" stroke-width="2"/>') },
+    'e2:5': { k: 'nc', real: false, tt: 'レッツゴー！陰陽師', sub: 'ドーマン・セーマン', cm: ['ドーマン・セーマン', 'レッツゴー！', 'なぜ流行った', '中毒性やばい'], svg: SVG('<rect width="320" height="180" fill="#2a1a3a"/><rect x="0" y="140" width="320" height="40" fill="#1a0f26"/>' +
+      '<g fill="#efe6d8"><path d="M90,138v-36l-10,-16l12,-10h-6l8,-14h12l8,14h-6l12,10l-10,16v36z"/><path d="M160,138v-40l-12,-18l14,-12h-7l9,-16h12l9,16h-7l14,12l-12,18v40z"/><path d="M230,138v-36l-10,-16l12,-10h-6l8,-14h12l8,14h-6l12,10l-10,16v36z"/></g>' +
+      '<g fill="#ffd166"><circle cx="96" cy="52" r="7"/><circle cx="166" cy="42" r="8"/><circle cx="236" cy="52" r="7"/></g>' +
+      '<g stroke="#ffd166" stroke-width="2" fill="none"><path d="M40,60l14,-14l14,14l-14,14z"/><path d="M252,60l14,-14l14,14l-14,14z"/><path d="M36,100h36M54,82v36M44,88l20,20M64,88l-20,20" opacity=".8"/></g>') },
+    'e2:6': { k: 'nc', real: true, tt: '（無題）', sub: 'アッー！', cm: ['アッー！', 'アッー！', 'やらないか', 'アッー！'], svg: SVG('<rect width="320" height="180" fill="#0a0a0a"/><rect x="60" y="40" width="200" height="100" fill="#111" stroke="#333"/><text x="160" y="96" text-anchor="middle" font-size="14" fill="#555">（映像は省略）</text>') },
+    'e2:7': { k: 'gm', real: false, svg: SVG('<rect width="320" height="200" fill="#1a1a2e"/><rect x="0" y="170" width="320" height="30" fill="#444"/>' +
+      '<g fill="#2b2b48"><rect x="0" y="40" width="320" height="6"/><rect x="0" y="80" width="320" height="6"/><rect x="0" y="120" width="320" height="6"/></g>' +
+      '<rect x="12" y="12" width="10" height="90" fill="#fff"/><rect x="14" y="80" width="6" height="20" fill="#f44"/>' +
+      '<rect x="296" y="12" width="10" height="90" fill="#fff"/><rect x="298" y="14" width="6" height="86" fill="#4f4"/>' +
+      '<g fill="#3b3b55"><rect x="196" y="76" width="78" height="84" rx="8"/><rect x="186" y="96" width="98" height="16" rx="4"/><circle cx="235" cy="104" r="30"/></g><circle cx="235" cy="104" r="22" fill="#1a1a2e"/><g stroke="#8c8cb0" stroke-width="3"><line x1="235" y1="84" x2="235" y2="124"/><line x1="215" y1="104" x2="255" y2="104"/></g>' +
+      '<g fill="#9cf" opacity=".9"><path d="M150,96l-16,-6l0,12z"/><path d="M150,116l-18,0l6,-6l-6,-6z" transform="translate(0,10)"/><path d="M150,136l-16,6l0,-12z"/></g>' +
+      '<g fill="#5bd"><rect x="60" y="120" width="18" height="30"/><rect x="52" y="150" width="34" height="8"/><circle cx="69" cy="112" r="10"/></g>' +
+      TXT(40, 40, '何回やっても', 16, '#fff', 'font-family="var(--f-dot)"') + TXT(40, 60, '倒せない', 16, '#fff', 'font-family="var(--f-dot)"'), '0 0 320 200') },
+    'e2:8': { k: 'bbs', real: true, t: '( ^ω^)が今日も暇なようです', p: ['( ^ω^)今日も暇だお', '( ^ω^)…', '( ^ω^)外は雨だお', '( ^ω^)寝るお', '続き待ってる'] },
+    'e2:9': { k: 'bbs', real: true, t: 'で、結局どっちが正しいの？', p: ['どっちも間違ってる', '>>100 ソース出せ', '　　　　　　ちょっと通りますよ　　（´・ω・）', '>>102 なんで牛', 'ごめんよ、通りがかっただけなんだ', '和んだ'] },
+    /* ---- 2010-2014 ---- */
+    'e3:0': { k: 'tw', real: true, nm: 'たろう', id: '@taro_0421', tx: 'コンビニで「温めますか？」に「いただきます」って答えた', mt: ['2012年5月3日 22:14', 'リツイート 3,201', 'お気に入り 1,988'], rp: [['みき', '草'], ['ゆう', '草生える'], ['けんた', '大草原不可避'], ['名無し', 'ｗｗｗｗｗ']] },
+    'e3:1': { k: 'ch', real: true, hd: '2011年 金曜 23:52', m: [['l', '終電まであと3分'], ['r', 'ワンチャン間に合う'], ['l', '走れ'], ['r', 'ワンチャンあった！！'], ['l', 'よかった']] },
+    'e3:2': { k: 'ch', real: true, hd: '2013年 月曜 7:12', m: [['l', '月曜日なくなればいいのに'], ['r', 'それな'], ['l', '1時間目から体育とか'], ['r', 'それなすぎる']] },
+    'e3:3': { k: 'tw', real: true, nm: 'さとし', id: '@satoshi_now', tx: '渋谷なう', ph: SVG(
+      /* 真上から見たスクランブル交差点：十字＋斜めの横断歩道を人の点が埋める */
+      '<rect width="320" height="180" fill="#2b2f3a"/>' +
+      /* 四隅の建物（屋上） */
+      '<g fill="#3a3448"><rect x="0" y="0" width="112" height="52"/><rect x="208" y="0" width="112" height="52"/><rect x="0" y="148" width="112" height="32"/><rect x="208" y="148" width="112" height="32"/></g>' +
+      /* 左上：大型ビジョンのビル、右上：円柱のビル（109） */
+      '<rect x="14" y="8" width="84" height="36" rx="3" fill="#4fc3f7"/><rect x="18" y="12" width="76" height="28" fill="#1565c0"/><text x="56" y="31" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">LIVE</text>' +
+      '<circle cx="264" cy="26" r="22" fill="#cfd8dc"/><circle cx="264" cy="26" r="14" fill="#90a4ae"/><text x="264" y="29" text-anchor="middle" font-size="9" fill="#263238" font-weight="700">109</text>' +
+      '<text x="56" y="170" text-anchor="middle" font-size="9" fill="#cfd8dc">渋谷駅</text>' +
+      /* 道路（十字） */
+      '<rect x="112" y="0" width="96" height="180" fill="#50545e"/><rect x="0" y="52" width="320" height="96" fill="#50545e"/>' +
+      /* 横断歩道：上下左右＋斜め2本（スクランブル） */
+      '<g stroke="#e9e9e9" stroke-width="16" stroke-dasharray="5 4" opacity=".92"><line x1="116" y1="60" x2="204" y2="60"/><line x1="116" y1="140" x2="204" y2="140"/><line x1="118" y1="56" x2="118" y2="144"/><line x1="202" y1="56" x2="202" y2="144"/><line x1="118" y1="58" x2="202" y2="142"/><line x1="202" y1="58" x2="118" y2="142"/></g>' +
+      /* 群衆（点） */
+      '<g fill="#111"><circle cx="165" cy="79" r="2.6"/><circle cx="174" cy="66" r="2.6"/><circle cx="133" cy="128" r="2.6"/><circle cx="136" cy="106" r="2.6"/><circle cx="131" cy="124" r="2.6"/><circle cx="151" cy="64" r="2.6"/><circle cx="135" cy="115" r="2.6"/><circle cx="177" cy="68" r="2.6"/><circle cx="154" cy="71" r="2.6"/><circle cx="194" cy="114" r="2.6"/><circle cx="131" cy="132" r="2.6"/><circle cx="139" cy="88" r="2.6"/><circle cx="131" cy="133" r="2.6"/><circle cx="174" cy="66" r="2.6"/><circle cx="152" cy="65" r="2.6"/><circle cx="195" cy="77" r="2.6"/><circle cx="161" cy="113" r="2.6"/><circle cx="142" cy="129" r="2.6"/><circle cx="139" cy="133" r="2.6"/><circle cx="163" cy="131" r="2.6"/><circle cx="147" cy="73" r="2.6"/><circle cx="148" cy="107" r="2.6"/><circle cx="136" cy="130" r="2.6"/><circle cx="132" cy="132" r="2.6"/><circle cx="131" cy="139" r="2.6"/><circle cx="150" cy="123" r="2.6"/><circle cx="234" cy="110" r="2.6"/><circle cx="169" cy="96" r="2.6"/><circle cx="179" cy="113" r="2.6"/><circle cx="176" cy="99" r="2.6"/><circle cx="136" cy="91" r="2.6"/><circle cx="106" cy="120" r="2.6"/><circle cx="259" cy="91" r="2.6"/><circle cx="80" cy="112" r="2.6"/><circle cx="136" cy="109" r="2.6"/><circle cx="186" cy="97" r="2.6"/><circle cx="246" cy="104" r="2.6"/><circle cx="133" cy="114" r="2.6"/><circle cx="78" cy="83" r="2.6"/><circle cx="191" cy="102" r="2.6"/><circle cx="102" cy="124" r="2.6"/><circle cx="147" cy="85" r="2.6"/><circle cx="185" cy="102" r="2.6"/><circle cx="70" cy="118" r="2.6"/><circle cx="79" cy="124" r="2.6"/><circle cx="202" cy="112" r="2.6"/><circle cx="140" cy="97" r="2.6"/><circle cx="237" cy="98" r="2.6"/><circle cx="178" cy="107" r="2.6"/><circle cx="175" cy="106" r="2.6"/><circle cx="151" cy="96" r="2.6"/><circle cx="227" cy="127" r="2.6"/><circle cx="248" cy="135" r="2.6"/><circle cx="154" cy="97" r="2.6"/><circle cx="192" cy="113" r="2.6"/><circle cx="72" cy="64" r="2.6"/><circle cx="200" cy="116" r="2.6"/><circle cx="189" cy="111" r="2.6"/><circle cx="258" cy="139" r="2.6"/><circle cx="224" cy="125" r="2.6"/><circle cx="116" cy="82" r="2.6"/><circle cx="137" cy="90" r="2.6"/><circle cx="193" cy="113" r="2.6"/><circle cx="64" cy="61" r="2.6"/><circle cx="167" cy="96" r="2.6"/><circle cx="226" cy="73" r="2.6"/><circle cx="236" cy="69" r="2.6"/><circle cx="248" cy="64" r="2.6"/><circle cx="106" cy="121" r="2.6"/><circle cx="234" cy="70" r="2.6"/><circle cx="210" cy="79" r="2.6"/><circle cx="181" cy="91" r="2.6"/><circle cx="85" cy="129" r="2.6"/><circle cx="243" cy="66" r="2.6"/><circle cx="170" cy="95" r="2.6"/><circle cx="150" cy="103" r="2.6"/><circle cx="83" cy="130" r="2.6"/><circle cx="96" cy="125" r="2.6"/><circle cx="87" cy="129" r="2.6"/><circle cx="204" cy="82" r="2.6"/></g>' +
+      /* 信号機（4つ） */
+      '<g><circle cx="110" cy="50" r="3" fill="#2ecc71"/><circle cx="210" cy="50" r="3" fill="#2ecc71"/><circle cx="110" cy="150" r="3" fill="#e74c3c"/><circle cx="210" cy="150" r="3" fill="#e74c3c"/></g>' +
+      '<text x="230" y="170" font-size="8" fill="#cfd8dc">スクランブル交差点</text>'), mt: ['2010年8月14日 15:02', 'webから'], rp: [['ゆか', 'わたしも渋谷なうｗ'], ['さとし', '風呂わず']] },
+    'e3:4': { k: 'scene', real: true, capt: '<b>本物</b><span>5段階の言葉はそのまま。表にしたのはこちら</span>', svg: SVG(BG +
+      TXT(16, 24, '怒りの5段階（2013年・女子高生発）', 11, 'var(--muted)') +
+      /* 横棒：下に行くほど長く・赤く */
+      '<g font-size="11" font-weight="700" fill="#fff" font-family="var(--f-display)">' +
+      '<rect x="16" y="34" width="70" height="22" rx="4" fill="#8fb5d6"/><text x="24" y="49">おこ</text>' +
+      '<rect x="16" y="62" width="110" height="22" rx="4" fill="#f0b541"/><text x="24" y="77">まじおこ</text>' +
+      '<rect x="16" y="90" width="170" height="22" rx="4" fill="#f07c2a"/><text x="24" y="105">激おこぷんぷん丸</text>' +
+      '<rect x="16" y="118" width="230" height="22" rx="4" fill="#dc2f2f"/><text x="24" y="133">ムカ着火ファイヤー</text>' +
+      '<rect x="16" y="146" width="290" height="22" rx="4" fill="#8e24aa"/><text x="24" y="161">カム着火インフェルノォォォ</text></g>' +
+      /* 右端に炎 */
+      '<path d="M292,28l6,-14l6,14z M304,26l9,-9l-2,11z" fill="#e33"/>') },
+    'e3:5': { k: 'tw', real: false, nm: '（アカウント削除済み）', id: '@――――', tx: 'このツイートは削除されました。', mt: ['2013年8月'], rp: [['まとめ', '消す前にスクショが広まって、店の名前まで特定された'], ['通りすがり', 'その店、閉店したらしい'], ['名無し', 'またバカッターか']] },
+    'e3:6': { k: 'scene', real: false, svg: SVG(
+      '<rect width="320" height="180" fill="#f1e9dc"/><rect x="0" y="0" width="128" height="180" fill="#e2d3bd"/><rect x="124" y="0" width="8" height="180" fill="#b89b78"/><rect x="0" y="150" width="320" height="30" fill="#c9b79a"/>' +
+      '<g fill="#ddd0bb" opacity=".6"><rect x="12" y="20" width="90" height="60" rx="2"/></g>' +
+      /* 迫る側（濃色） */
+      '<g fill="#2b2b3a"><circle cx="176" cy="62" r="16"/><path d="M156,80h40a8,8 0 0 1 8,8v62h-56v-62a8,8 0 0 1 8,-8z"/><path d="M160,84l-28,-22" stroke="#2b2b3a" stroke-width="14" stroke-linecap="round"/><circle cx="132" cy="60" r="8"/></g>' +
+      /* 壁側（明色） */
+      '<g fill="var(--era)"><circle cx="150" cy="84" r="13"/><path d="M136,98h28a6,6 0 0 1 6,6v46h-40v-46a6,6 0 0 1 6,-6z"/></g>' +
+      '<g fill="#fff"><path d="M146,80q4,4 8,0" stroke="#fff" stroke-width="1.5" fill="none"/><circle cx="145" cy="82" r="1.5"/><circle cx="155" cy="82" r="1.5"/></g>' +
+      '<text x="14" y="120" font-size="26" font-weight="900" fill="#c62828" font-family="var(--f-display)">ドン！</text><g stroke="#c62828" stroke-width="3" stroke-linecap="round"><path d="M118,48l-10,-10 M122,60l-14,-2 M116,72l-10,8"/></g>') },
+    'e3:7': { k: 'tw', real: false, nm: 'まいにち♡きらきら', id: 'ブログ更新', tx: '最近ハマってるサプリ♡ 朝のだるさが全然違う！リンク貼っとくね→\n※個人の感想です', ph: SVG('<rect width="320" height="180" fill="#fff5f8"/><g><rect x="118" y="36" width="84" height="116" rx="12" fill="#f48fb1"/><rect x="128" y="56" width="64" height="44" rx="4" fill="#fff"/><text x="160" y="82" text-anchor="middle" font-size="12" fill="#c2185b" font-weight="700">サプリ</text><rect x="140" y="26" width="40" height="14" rx="4" fill="#ec407a"/></g><g fill="#f8bbd0"><circle cx="60" cy="60" r="14"/><circle cx="260" cy="120" r="10"/><circle cx="250" cy="50" r="6"/></g><text x="30" y="150" font-size="11" fill="#ad1457">#PR とは書いていない</text>'), mt: ['2012年1月'], rp: [['読者', 'これステマだろ'], ['読者2', '同じ日に5人が同じサプリ紹介してて草']] },
+    'e3:8': { k: 'scene', real: false, svg: SVG(BG + '<circle cx="160" cy="98" r="62" fill="#F4D7B8"/><path d="M98,98q0,-70 62,-66q62,-4 62,66q-20,-30 -62,-28q-42,-2 -62,28z" fill="#3b2a24"/>' +
+      '<path d="M126,82q14,-10 26,0 M168,78q12,-10 26,0" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="139" cy="94" rx="5" ry="3" fill="#222"/><ellipse cx="181" cy="92" rx="5" ry="3" fill="#222"/>' +
+      '<path d="M134,124q26,14 54,-4" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M188,120q10,-4 6,-12" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+      '<g fill="#FFE26A"><path d="M60,40l4,10l10,4l-10,4l-4,10l-4,-10l-10,-4l10,-4z"/><path d="M250,130l3,8l8,3l-8,3l-3,8l-3,-8l-8,-3l8,-3z"/><path d="M248,40l2,6l6,2l-6,2l-2,6l-2,-6l-6,-2l6,-2z"/></g>' + TXT(222, 70, 'ドヤァ', 22, 'var(--era)', 'font-family="var(--f-display)"')) },
+    'e3:9': { k: 'tw', real: true, nm: 'あおい', id: '@aoi_photo', tx: '何回見返してもジワる', ph: SVG(
+      /* 普通のリビング写真。ソファに猫が人間みたいに座ってテレビを見ている */
+      '<rect width="320" height="180" fill="#efe9dc"/><rect x="0" y="130" width="320" height="50" fill="#c9b58f"/>' +
+      '<rect x="22" y="40" width="80" height="54" rx="3" fill="#222"/><rect x="26" y="44" width="72" height="46" fill="#3b4a5c"/><rect x="52" y="94" width="20" height="12" fill="#333"/>' +
+      '<rect x="140" y="88" width="160" height="60" rx="8" fill="#7a8fa6"/><rect x="146" y="70" width="148" height="26" rx="6" fill="#8ea3ba"/><rect x="132" y="96" width="14" height="52" rx="6" fill="#6b7f95"/><rect x="294" y="96" width="14" height="52" rx="6" fill="#6b7f95"/>' +
+      /* 猫：背もたれにもたれ、足を前に投げ出し、前足でリモコン */
+      '<g fill="#e0a860"><ellipse cx="228" cy="112" rx="22" ry="26"/><circle cx="228" cy="78" r="17"/><path d="M214,66l-3,-16l12,9z M242,66l3,-16l-12,9z"/><rect x="214" y="128" width="12" height="26" rx="6"/><rect x="232" y="128" width="12" height="26" rx="6"/><rect x="206" y="104" width="12" height="20" rx="6" transform="rotate(-40 212 104)"/></g>' +
+      '<g fill="#f6dcb0"><ellipse cx="228" cy="86" rx="8" ry="5"/><ellipse cx="228" cy="116" rx="12" ry="18"/></g>' +
+      '<g fill="#222"><circle cx="222" cy="76" r="1.8"/><circle cx="234" cy="76" r="1.8"/></g><path d="M226,82h4" stroke="#222" stroke-width="1.2"/>' +
+      '<rect x="196" y="98" width="16" height="7" rx="2" fill="#333" transform="rotate(-40 204 101)"/>' +
+      '<text x="12" y="172" font-size="8" fill="#6b5a3e">リビング</text>'), mt: ['2013年11月2日'], rp: [['りく', 'じわじわくる'], ['はな', '座り方ｗｗ'], ['あおい', 'リモコン持ってるのがジワる']] },
+    'e4:0': { k: 'ch', real: true, hd: '2019年 火曜 23:51', m: [['l', '明日テストやん'], ['r', 'ぴえん🥺'], ['l', '範囲広すぎ'], ['r', 'ぴえん超えてぱおん']] },
+    'e4:1': { k: 'ig', real: true, nm: 'yuna_____', likes: '1,204', cap: '<b>yuna_____</b> エモい #夕暮れ #帰り道 #フィルム風', svg: SVG('<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2a6e"/><stop offset=".55" stop-color="#e3695a"/><stop offset="1" stop-color="#f7b267"/></linearGradient></defs><rect width="320" height="240" fill="url(#sk)"/><circle cx="160" cy="150" r="30" fill="#ffd27a"/><rect x="0" y="170" width="320" height="70" fill="#1d1a2b"/><g fill="#1d1a2b"><rect x="30" y="120" width="12" height="60"/><rect x="42" y="100" width="4" height="80"/><rect x="250" y="130" width="40" height="50"/></g><path d="M0,120h320" stroke="#1d1a2b" stroke-width="1.5"/><path d="M60,120q0,-40 0,-80 M200,120q0,-50 0,-100" stroke="#1d1a2b" stroke-width="1"/>', '0 0 320 240') },
+    'e4:2': { k: 'tw', real: true, nm: 'みお', id: '@mio_oshi', tx: '尊い……………………尊死', ph: SVG(
+      '<defs><radialGradient id="lg" cx=".5" cy=".25" r=".75"><stop offset="0" stop-color="#ffb3dc"/><stop offset="1" stop-color="#1a0b2e"/></radialGradient></defs><rect width="320" height="180" fill="url(#lg)"/>' +
+      /* 後光 */
+      '<g stroke="#fff" stroke-width="1.5" opacity=".45"><path d="M160,8l-110,120 M160,8l110,120 M160,8l-40,130 M160,8l40,130 M160,8l-75,125 M160,8l75,125"/></g><circle cx="160" cy="70" r="46" fill="#fff" opacity=".12"/>' +
+      /* ステージ */
+      '<rect x="40" y="112" width="240" height="14" fill="#2a1b3d"/>' +
+      /* 2人：つないだ手を高く上げる */
+      '<g fill="#fff"><circle cx="140" cy="68" r="9"/><path d="M130,78h20a4,4 0 0 1 4,4v30h-28v-30a4,4 0 0 1 4,-4z"/><circle cx="180" cy="70" r="9"/><path d="M170,80h20a4,4 0 0 1 4,4v28h-28v-28a4,4 0 0 1 4,-4z"/></g>' +
+      '<path d="M148,82l12,-30 M172,84l-12,-32" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="160" cy="50" r="5" fill="#fff"/>' +
+      /* キラキラとハート */
+      '<g fill="#fff"><path d="M90,40l2,6l6,2l-6,2l-2,6l-2,-6l-6,-2l6,-2z"/><path d="M236,36l2,6l6,2l-6,2l-2,6l-2,-6l-6,-2l6,-2z"/><path d="M116,22l1.5,4l4,1.5l-4,1.5l-1.5,4l-1.5,-4l-4,-1.5l4,-1.5z"/></g>' +
+      '<g fill="#ff80ab"><path d="M206,56c-3,-5 -11,-3 -9,3c1.5,4 9,8 9,8s7.5,-4 9,-8c2,-6 -6,-8 -9,-3z"/><path d="M104,66c-2,-4 -8,-2 -7,2c1,3 7,6 7,6s6,-3 7,-6c1,-4 -5,-6 -7,-2z"/></g>' +
+      /* 客席：ペンライト */
+      '<rect x="0" y="130" width="320" height="50" fill="#1a1a1a"/><g fill="#ff80ab"><rect x="30" y="118" width="4" height="30"/><rect x="70" y="122" width="4" height="26"/><rect x="110" y="120" width="4" height="28"/><rect x="200" y="124" width="4" height="24"/><rect x="240" y="118" width="4" height="30"/><rect x="280" y="122" width="4" height="26"/></g>' +
+      '<g fill="#333"><circle cx="32" cy="150" r="7"/><circle cx="72" cy="152" r="7"/><circle cx="112" cy="150" r="7"/><circle cx="202" cy="152" r="7"/><circle cx="242" cy="150" r="7"/><circle cx="282" cy="152" r="7"/></g>' +
+      /* 尊死：倒れたファンと、昇っていく魂 */
+      '<g fill="#333"><ellipse cx="160" cy="160" rx="16" ry="6"/><circle cx="146" cy="158" r="6"/></g>' +
+      '<g fill="#fff" opacity=".85"><path d="M160,146c-6,0 -8,-6 -4,-10c3,-3 8,-3 11,0c4,4 2,10 -4,10l-1,6z"/><circle cx="158" cy="140" r="1" fill="#333"/><circle cx="163" cy="140" r="1" fill="#333"/></g><text x="172" y="146" font-size="9" fill="#fff" opacity=".8">尊い…</text>'), mt: ['2017年'], rp: [['れい', '尊い'], ['なな', 'てぇてぇ'], ['みお', '語彙力が死んだ']] },
+    'e4:3': { k: 'sh', real: true, cp: '推ししか勝たん', svg: SVG('<defs><linearGradient id="st" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7eb3"/><stop offset="1" stop-color="#7afcff"/></linearGradient></defs><rect width="180" height="260" fill="url(#st)"/><text x="90" y="120" text-anchor="middle" font-size="22" font-weight="900" fill="#fff" font-family="var(--f-display)">推ししか</text><text x="90" y="150" text-anchor="middle" font-size="22" font-weight="900" fill="#fff" font-family="var(--f-display)">勝たん</text><text x="90" y="200" text-anchor="middle" font-size="11" fill="#fff">#今日も生きてる</text>', '0 0 180 260') },
+    'e4:4': { k: 'tw', real: true, nm: 'ねこの人', id: '@neko_asa', tx: '寝起きの猫、完全におじさん', ph: SVG('<rect width="320" height="180" fill="#f3efe6"/><rect x="0" y="120" width="320" height="60" fill="#d9cfbd"/><rect x="60" y="100" width="200" height="40" rx="8" fill="#e9e1d1"/>' + CAT(160, 104, 1.2, '#6b5a4a') + '<path d="M118,96q6,2 10,0 M138,96q6,2 10,0" stroke="#222" stroke-width="2" fill="none"/>'), mt: ['2018年3月', 'リツイート 4.2万', 'いいね 18.6万'], rp: [['ねこの人', 'バズったので宣伝します。何もありません'], ['通りすがり', 'バズってる'], ['みき', 'おすすめから来ました']] },
+    'e4:5': { k: 'ig', real: false, nm: 'cafe_hopping_jp', likes: '3,588', cap: '<b>cafe_hopping_jp</b> 映えすぎて食べるの忘れた #インスタ映え #カフェ巡り', svg: SVG('<rect width="320" height="240" fill="#f7efe3"/><ellipse cx="160" cy="190" rx="120" ry="26" fill="#fff"/><g fill="#e6b36a"><ellipse cx="160" cy="170" rx="80" ry="18"/><ellipse cx="160" cy="150" rx="78" ry="18"/><ellipse cx="160" cy="130" rx="76" ry="18"/></g><path d="M90,128q30,30 70,20q40,-10 70,-20" fill="none" stroke="#c98a3a" stroke-width="3"/><ellipse cx="160" cy="118" rx="40" ry="10" fill="#fff6e0"/><g fill="#e03b5a"><circle cx="150" cy="110" r="8"/><circle cx="168" cy="106" r="8"/><circle cx="160" cy="120" r="7"/></g><path d="M100,135l8,30 M220,135l-8,30" stroke="#7a4f1d" stroke-width="2"/><g fill="#9bbf8a" opacity=".8"><path d="M190,104q10,-14 22,-6q-12,2 -22,6z"/></g>', '0 0 320 240') },
+    'e4:6': { k: 'ch', real: true, hd: '2016年 金曜 18:03', m: [['l', '明日10時に駅集合ね'], ['r', 'り'], ['l', '遅れないでよ'], ['r', 'りょ']] },
+    'e4:7': { k: 'scene', real: false, svg: SVG(
+      '<rect width="320" height="180" fill="#fbf7ff"/><rect x="0" y="140" width="320" height="40" fill="#e9e2f5"/>' +
+      /* ペンライト */
+      '<g><rect x="34" y="60" width="14" height="80" rx="4" fill="#2b2b2b"/><rect x="32" y="26" width="18" height="40" rx="7" fill="#ff7bd1"/><ellipse cx="41" cy="30" rx="28" ry="16" fill="#ff7bd1" opacity=".3"/></g>' +
+      /* アクリルスタンド（後ろ姿のシルエット） */
+      '<g><rect x="86" y="124" width="60" height="10" rx="2" fill="#cfd8e3"/><rect x="100" y="40" width="32" height="84" rx="6" fill="#dfe8f3" opacity=".8"/><circle cx="116" cy="60" r="11" fill="#5a4b6b"/><path d="M104,72h24a4,4 0 0 1 4,4v40h-32v-40a4,4 0 0 1 4,-4z" fill="#8a6fb5"/></g>' +
+      /* 缶バッジ */
+      '<g><circle cx="176" cy="64" r="16" fill="#fff" stroke="#bbb"/><circle cx="176" cy="64" r="11" fill="#ff7bd1"/><circle cx="176" cy="104" r="16" fill="#fff" stroke="#bbb"/><circle cx="176" cy="104" r="11" fill="#7ad0ff"/></g>' +
+      /* チケット */
+      '<g transform="rotate(-8 250 100)"><rect x="200" y="78" width="100" height="44" rx="4" fill="#fff" stroke="#bbb"/><rect x="200" y="78" width="100" height="12" fill="var(--era)"/><text x="250" y="110" text-anchor="middle" font-size="12" fill="#333">遠征 2DAYS</text><circle cx="200" cy="100" r="5" fill="#fbf7ff"/><circle cx="300" cy="100" r="5" fill="#fbf7ff"/></g>' +
+      '<g fill="var(--muted)" font-size="10"><text x="24" y="162">ペンライト</text><text x="88" y="162">アクスタ</text><text x="158" y="162">缶バッジ</text><text x="226" y="162">チケット</text></g>') },
+    'e4:8': { k: 'ch', real: true, hd: '2018年 水曜 22:40', m: [['l', '課題、今日までだったよね'], ['r', 'やばたにえん'], ['l', 'まだ1文字も書いてない'], ['r', 'つらたにえん']] },
+    'e4:9': { k: 'ch', real: true, hd: '2018年 木曜 12:15', m: [['r', 'ノート見せて🙏'], ['l', 'いいよ〜'], ['r', 'あざまる水産'], ['l', 'よいちょまる']] },
+    /* ---- 2020-2026 ---- */
+    'e5:0': { k: 'ch', real: true, hd: '2022年 金曜 8:02', m: [['l', 'おはよ'], ['r', 'え、今日金曜日'], ['r', 'もう金曜日ってコト!?'], ['l', '来週も月曜日あるってコト!?'], ['r', 'やめて']] },
+    'e5:1': { k: 'scene', real: false, svg: SVG(
+      '<rect width="320" height="180" fill="#0f2740"/><rect x="0" y="0" width="320" height="30" fill="#0a1c2f"/><text x="12" y="20" font-size="10" fill="#8fb3d9">討論番組　生放送</text>' +
+      '<rect x="24" y="40" width="272" height="96" rx="4" fill="#163a5c"/><rect x="24" y="40" width="136" height="96" fill="#1b4a73"/>' +
+      '<g fill="#dfe6ee"><circle cx="92" cy="78" r="16"/><path d="M70,96h44a8,8 0 0 1 8,8v32h-60v-32a8,8 0 0 1 8,-8z"/></g><rect x="60" y="112" width="64" height="24" fill="#163a5c" opacity=".0"/>' +
+      '<g fill="#dfe6ee"><circle cx="228" cy="80" r="16"/><path d="M206,98h44a8,8 0 0 1 8,8v30h-60v-30a8,8 0 0 1 8,-8z"/></g><path d="M212,70q8,-14 24,-10" stroke="#dfe6ee" stroke-width="2" fill="none"/>' +
+      '<path d="M118,108l-14,-18" stroke="#dfe6ee" stroke-width="8" stroke-linecap="round"/>' +
+      '<rect x="24" y="118" width="136" height="18" fill="#0a1c2f" opacity=".7"/><text x="92" y="131" text-anchor="middle" font-size="9" fill="#fff">コメンテーター</text>' +
+      '<rect x="20" y="144" width="280" height="26" fill="#fff"/><text x="160" y="162" text-anchor="middle" font-size="13" font-weight="900" fill="#111">それってあなたの感想ですよね</text>') },
+    'e5:2': { k: 'scene', real: false, svg: SVG(
+      '<rect width="320" height="180" fill="#f4f1ea"/>' +
+      '<g fill="#fff" stroke="#bbb"><rect x="8" y="26" width="96" height="134" rx="4"/><rect x="112" y="26" width="96" height="134" rx="4"/><rect x="216" y="26" width="96" height="134" rx="4"/></g>' +
+      '<g font-size="10" fill="#555" font-weight="700"><text x="12" y="18">① 好きだった</text><text x="116" y="18">② フードコートで</text><text x="220" y="18">③ 急に冷めた</text></g>' +
+      '<g fill="#3b3f52"><circle cx="56" cy="80" r="13"/><path d="M42,94h28a6,6 0 0 1 6,6v40h-40v-40a6,6 0 0 1 6,-6z"/></g><path d="M78,52c-6,-10 -22,-6 -18,6c3,8 18,16 18,16s15,-8 18,-16c4,-12 -12,-16 -18,-6z" fill="#e0457b"/>' +
+      '<rect x="112" y="40" width="96" height="16" fill="#f8d9a6"/><g font-size="7" fill="#7a4a1d"><text x="116" y="51">うどん</text><text x="146" y="51">カレー</text><text x="178" y="51">たこ焼</text></g>' +
+      '<g fill="#3b3f52"><circle cx="160" cy="86" r="12"/><path d="M148,98h24a5,5 0 0 1 5,5v30h-34v-30a5,5 0 0 1 5,-5z"/><path d="M150,134l-8,20 M170,134l10,18" stroke="#3b3f52" stroke-width="7" stroke-linecap="round"/></g>' +
+      '<g><rect x="134" y="112" width="52" height="7" rx="2" fill="#b07a3a"/><ellipse cx="148" cy="110" rx="8" ry="3" fill="#fff"/><rect x="162" y="104" width="18" height="7" rx="2" fill="#e9c46a"/></g>' +
+      '<g stroke="#3b3f52" stroke-width="2" fill="none"><path d="M136,74q-6,-6 -2,-12 M184,74q6,-6 2,-12"/></g><rect x="118" y="60" width="52" height="14" rx="7" fill="#fff" stroke="#bbb"/><text x="144" y="70" text-anchor="middle" font-size="9" fill="#3b3f52">席…どこ…</text>' +
+      '<g fill="#3b3f52"><circle cx="248" cy="80" r="13"/><path d="M234,94h28a6,6 0 0 1 6,6v40h-40v-40a6,6 0 0 1 6,-6z"/></g>' +
+      '<g transform="translate(284,58)"><ellipse cx="0" cy="8" rx="16" ry="11" fill="#6abf69"/><circle cx="-7" cy="-2" r="5" fill="#6abf69"/><circle cx="7" cy="-2" r="5" fill="#6abf69"/><circle cx="-7" cy="-2" r="2.5" fill="#fff"/><circle cx="7" cy="-2" r="2.5" fill="#fff"/><circle cx="-6" cy="-2" r="1.2"/><circle cx="8" cy="-2" r="1.2"/><path d="M-7,11q7,4 14,0" stroke="#2e7d32" stroke-width="1.5" fill="none"/></g>' +
+      '<g font-size="9" fill="#3b3f52"><text x="226" y="150">……無理かも</text></g>' +
+      '<text x="160" y="174" text-anchor="middle" font-size="9" fill="#777">好き → ささいな行動 → 急に冷める　これが蛙化現象</text>') },
+    'e5:3': { k: 'ch', real: true, hd: '2022年 日曜 19:20', m: [['l', '明日雨らしいで'], ['l', '知らんけど'], ['r', 'どっちやねん'], ['l', '降るか降らんかは降ってみなわからん、知らんけど']] },
+    'e5:4': { k: 'sh', real: false, cp: 'バイト先で怒られた時の私 と それを見てる同僚', svg: SVG(
+      '<rect width="180" height="260" fill="#111"/><rect x="12" y="46" width="156" height="150" fill="#f5e9d6"/>' +
+      '<rect x="12" y="46" width="156" height="34" fill="#e8d6bc"/><g fill="#c9b596"><rect x="24" y="52" width="28" height="22" rx="2"/><rect x="60" y="52" width="28" height="22" rx="2"/><rect x="96" y="52" width="28" height="22" rx="2"/><rect x="132" y="52" width="28" height="22" rx="2"/></g>' +
+      CAT(62, 140, .9, '#2a2a2a') + '<g fill="#2a2a2a"><circle cx="40" cy="126" r="2.5" fill="#fff"/><circle cx="48" cy="126" r="2.5" fill="#fff"/></g>' +
+      CAT(132, 150, .7, '#e6b45c') + '<path d="M100,96q-14,-18 -28,0" stroke="#e53935" stroke-width="3" fill="none"/><g font-size="10" fill="#e53935" font-weight="700"><text x="104" y="92">！</text></g>' +
+      '<g fill="#8b6b4a"><rect x="12" y="186" width="156" height="10"/></g>' +
+      '<text x="90" y="34" text-anchor="middle" font-size="9" fill="#fff" opacity=".8">猫の動画をつないで日常を語る形式</text>', '0 0 180 260') },
+    'e5:5': { k: 'scene', real: true, capt: '<b>本物</b><span>界隈の名前はそのまま。重なり方はこちらの図</span>', svg: SVG(BG + '<circle cx="120" cy="90" r="62" fill="var(--era)" opacity=".35"/><circle cx="200" cy="90" r="62" fill="#e07a5f" opacity=".35"/><circle cx="160" cy="130" r="40" fill="#3d9970" opacity=".35"/>' +
+      '<g font-size="11" font-weight="700" fill="var(--fg)"><text x="72" y="70">風呂キャンセル界隈</text><text x="190" y="70">二度寝界隈</text><text x="150" y="160" text-anchor="middle">夜ふかし界隈</text><text x="160" y="104" text-anchor="middle" font-size="14" fill="#C00">あなた</text></g>') },
+    'e5:6': { k: 'ch', real: true, hd: '2022年 土曜 15:02', m: [['l', '駅で元カレ見かけた'], ['r', 'え'], ['l', '向こうも気づいてた'], ['r', 'きまZ']] },
+    'e5:7': { k: 'sh', lt: true, real: false, cp: '働いても給料上がらないの、なぁぜなぁぜ？', svg: SVG(
+      '<rect width="180" height="260" fill="#eef2f7"/><rect x="0" y="200" width="180" height="60" fill="#d7dfe8"/>' +
+      '<rect x="20" y="150" width="140" height="50" rx="4" fill="#c9d3de"/><rect x="40" y="130" width="60" height="20" rx="2" fill="#333"/><rect x="42" y="132" width="56" height="16" fill="#9fc5ff"/>' +
+      '<g fill="#36405a"><circle cx="90" cy="92" r="18"/><path d="M66,112h48a8,8 0 0 1 8,8v30h-64v-30a8,8 0 0 1 8,-8z"/></g><rect x="84" y="112" width="12" height="30" fill="#fff"/><path d="M90,112l-4,8h8z" fill="#c62828"/>' +
+      '<path d="M66,118l-20,-14 M114,118l20,-14" stroke="#36405a" stroke-width="8" stroke-linecap="round"/>' +
+      '<text x="90" y="52" text-anchor="middle" font-size="20" font-weight="900" fill="#223" font-family="var(--f-display)">なぁぜ</text><text x="90" y="76" text-anchor="middle" font-size="20" font-weight="900" fill="#223" font-family="var(--f-display)">なぁぜ？</text>', '0 0 180 260') },
+    'e5:8': { k: 'scene', real: false, svg: SVG(
+      '<defs><linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe0f7"/><stop offset="1" stop-color="#eaf4fb"/></linearGradient></defs><rect width="320" height="180" fill="url(#sky2)"/>' +
+      /* 大屋根リング */
+      '<path d="M20,130a140,70 0 0 1 280,0" fill="none" stroke="#d9b98a" stroke-width="12"/><path d="M20,130a140,70 0 0 1 280,0" fill="none" stroke="#b8945f" stroke-width="2"/>' +
+      '<g stroke="#b8945f" stroke-width="2"><line x1="40" y1="118" x2="40" y2="140"/><line x1="80" y1="92" x2="80" y2="140"/><line x1="120" y1="78" x2="120" y2="140"/><line x1="160" y1="72" x2="160" y2="140"/><line x1="200" y1="78" x2="200" y2="140"/><line x1="240" y1="92" x2="240" y2="140"/><line x1="280" y1="118" x2="280" y2="140"/></g>' +
+      '<rect x="0" y="140" width="320" height="40" fill="#cfd9c3"/>' +
+      /* 行列と売店 */
+      '<rect x="190" y="104" width="110" height="36" fill="#fff" stroke="#999"/><rect x="190" y="104" width="110" height="10" fill="#e0272c"/><text x="245" y="130" text-anchor="middle" font-size="10" fill="#333" font-weight="700">公式グッズ　完売</text>' +
+      '<g fill="#444"><circle cx="40" cy="152" r="5"/><rect x="36" y="157" width="8" height="14"/><circle cx="60" cy="154" r="5"/><rect x="56" y="159" width="8" height="14"/><circle cx="80" cy="152" r="5"/><rect x="76" y="157" width="8" height="14"/><circle cx="100" cy="154" r="5"/><rect x="96" y="159" width="8" height="14"/><circle cx="120" cy="152" r="5"/><rect x="116" y="157" width="8" height="14"/><circle cx="140" cy="154" r="5"/><rect x="136" y="159" width="8" height="14"/><circle cx="160" cy="152" r="5"/><rect x="156" y="157" width="8" height="14"/></g>' +
+      '<g><circle cx="50" cy="146" r="7" fill="#e0272c"/><circle cx="110" cy="146" r="7" fill="#e0272c"/></g>' +
+      '<text x="12" y="24" font-size="11" fill="#345">2025年　大阪・関西万博　会場</text>') },
+    'e5:9': { k: 'scene', real: false, svg: SVG(BG + '<g fill="#F1C9A5" stroke="#b98b65" stroke-width="2"><ellipse cx="160" cy="130" rx="46" ry="40"/><rect x="118" y="60" width="16" height="60" rx="8"/><rect x="136" y="48" width="16" height="72" rx="8"/><rect x="154" y="44" width="16" height="76" rx="8"/><rect x="172" y="50" width="16" height="70" rx="8"/><rect x="190" y="62" width="16" height="58" rx="8"/><rect x="206" y="90" width="18" height="40" rx="9" transform="rotate(-30 215 110)"/></g>' +
+      '<rect x="18" y="14" width="96" height="20" rx="3" fill="#111"/><text x="66" y="28" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">AI生成画像</text>' +
+      '<text x="236" y="150" font-size="12" fill="#C00" font-weight="700">←6本目</text>') }
+  };
+
+  function vis(key, idx) {
+    var v = VIS[key]; if (!v) return '';
+    var inner = '', cap;
+    switch (v.k) {
+      case 'bbs': inner = rBbs(v); break;
+      case 'txs': inner = rTxs(v); break;
+      case 'tw': inner = rTw(v); break;
+      case 'ch': inner = rCh(v); break;
+      case 'nc': inner = rNc(v); break;
+      case 'sh': inner = rSh(v); break;
+      case 'ig': inner = rIg(v); break;
+      case 'gm': inner = '<div class="sc gm">' + v.svg + '</div>'; break;
+      default: inner = '<div class="sc scene">' + v.svg + '</div>';
+    }
+    cap = v.capt ? v.capt : v.real
+      ? '<b>本物</b><span>言葉はそのまま。周りの画面は当時の様子を再現</span>'
+      : '<b class="img">イメージ</b><span>当時の様子を描き起こしたもの</span>';
+    return '<div class="card">' + inner + '<div class="cap">' + cap + '</div></div>';
+  }
+  function rBbs(v) {
+    var h = '<div class="sc bbs"><div class="bt">' + esc(v.t) + '</div>';
+    v.p.forEach(function (p, i) {
+      var pre = p && p.pre !== undefined;
+      h += '<div class="po"><span class="pn">' + (i + 1) + '</span> <span class="pm">名前：名無しさん</span> <span class="pd">投稿日：' + (i * 7 + 3) + '分前</span>' +
+        (pre ? '<pre class="px">' + esc(p.pre) + '</pre>' : '<div class="px">' + esc(p) + '</div>') + '</div>';
+    });
+    return h + '</div>';
+  }
+  function rTxs(v) {
+    var h = '<div class="sc txs">';
+    v.sm.forEach(function (s) { h += '<div class="sm">' + esc(s) + '</div>'; });
+    h += '<div class="huge">' + esc(v.huge) + '</div>';
+    if (v.tail) h += '<div class="sm">' + esc(v.tail) + '</div>';
+    return h + '</div>';
+  }
+  function rTw(v) {
+    var ph = '';
+    if (v.ph) ph = '<div class="ph">' + (v.ph.indexOf('<svg') === 0 ? v.ph : esc(v.ph)) + (v.fire ? '<span class="stamp-fire">炎上</span>' : '') + '</div>';
+    var h = '<div class="sc tw"><span class="av"></span><div class="nm">' + esc(v.nm) + '<span>' + esc(v.id) + '</span></div><div class="tx">' + esc(v.tx) + '</div>' + ph +
+      '<div class="mt">' + v.mt.map(esc).join('<span>·</span>') + '</div>';
+    if (v.rp) { h += '<div class="rp">'; v.rp.forEach(function (r) { h += '<div><span>' + esc(r[0]) + '</span>' + esc(r[1]) + '</div>'; }); h += '</div>'; }
+    return h + '</div>';
+  }
+  function rCh(v) {
+    var h = '<div class="sc ch"><div class="hd">' + esc(v.hd) + '</div>';
+    v.m.forEach(function (m, i) {
+      var right = m[0] === 'r';
+      var meta = '<span class="rd">' + (right && i === v.m.length - 1 ? '' : (right ? '既読<br>' : '')) + (12 + i) + ':0' + (i % 10) + '</span>';
+      h += '<div class="m ' + m[0] + '">' + (right ? meta : '') + '<span class="b">' + esc(m[1]) + '</span>' + (right ? '' : meta) + '</div>';
+    });
+    return h + '</div>';
+  }
+  function rNc(v) {
+    var h = '<div class="sc nc">' + (v.svg || '') + '<div class="tt">' + esc(v.tt) + '</div>';
+    var tops = [16, 28, 40, 52, 64, 40], lefts = [4, 38, 14, 50, 26, 62];
+    v.cm.forEach(function (c, i) { h += '<span class="cm" style="top:' + tops[i % 6] + '%;left:' + lefts[i % 6] + '%">' + esc(c) + '</span>'; });
+    if (v.sub) h += '<div class="sub">' + esc(v.sub) + '</div>';
+    return h + '<div class="bar"><i></i></div></div>';
+  }
+  function rSh(v) {
+    return '<div class="sc sh' + (v.lt ? ' lt' : '') + '">' + v.svg + '<div class="cp">' + esc(v.cp) + '</div><div class="side"><span><i></i>♥</span><span><i></i>コメ</span><span><i></i>共有</span></div></div>';
+  }
+  function rIg(v) {
+    return '<div class="sc ig"><div class="hd"><i></i>' + esc(v.nm) + '</div><div class="ph">' + v.svg + '</div><div class="ft"><span>♡ ' + esc(v.likes) + ' いいね</span><span>' + v.cap + '</span></div></div>';
+  }
+
+  /* score tiers: [min, rank label, comments[]] */
+  var TIERS = [
+    [0, 'ネット赤ちゃん', ['全部知らないのは、逆にすごい。今日からあなたの年代記が始まります。', 'ネットの空気に一度も触れていない、純粋な人。大切にしてください。']],
+    [1, '新規垢', ['まだ新しいアカウント。これから黒歴史を作っていきましょう。', '通じる言葉が少ない＝ネットに毒されていない。良いことです。', 'ここから先は沼です。引き返すなら今。']],
+    [20, 'ROM専卒業', ['見てはいたけど、書き込みはしていなかったタイプ。', '知ってるけど使わない。それが一番かしこい付き合い方です。', 'ちょうどいい距離感。ネットと健全に付き合えています。']],
+    [45, '常連', ['どの時代の空気も吸ってきた人。話が合う相手が多いはず。', 'そこそこ沼に浸かっています。腰くらいまで。', '「あー、あったあった」の回数が多い人。良い人生です。']],
+    [70, '古参', ['ネット歴が長い。若い人の言葉も追えている。要するに、ずっと画面を見ています。', 'この点数は、だいぶ夜ふかしした証拠です。', '黒歴史、いくつか心当たりがあるはずです。']],
+    [90, 'ネットの生き字引', ['ここまで来ると才能です。何かの研究者か、ずっと家にいた人。', 'あなたがいればネット文化史の本が書けます。', '全部「使ってた」。もう胸を張っていい。']]
+  ];
+  /* 結果カードの下に足す外部リンク（別問題バージョンなど）。空なら何も出ない。
+     例：{ label: '結果に満足いかなかった人はこちら', url: 'https://example.com/another', note: '別の50問でもう一回' } */
+  var EXTRA_RESULT_LINKS = [];
+  var SPREAD = { title: '全時代制覇。ずっとネットにいる人', sub: 'どの時代の言葉も使ってきました。ネット歴は20年級、ネットと一緒に年を取った人です。' };
+  var BABY = { title: 'ネット赤ちゃん。まっさらな人', sub: 'ひとつも使ったことがない、きれいな状態です。この画面を見ている時点で、もう手遅れかもしれませんが。' };
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  /* saved answers: this browser only. key "e1:3" -> 0/1/2 */
+  var KEY = 'meme-chronicle-v2';
+  var marks = {};
+  try { marks = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { marks = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(marks)); } catch (e) {} }
+  var openDet = {};
+  var MODEKEY = 'meme-chronicle-mode';
+  var mode = 'answer';
+  try { if (localStorage.getItem(MODEKEY) === 'read') mode = 'read'; } catch (e) {}
+  var SKINKEY = 'meme-chronicle-skin';
+  var skin = false;
+  try { skin = localStorage.getItem(SKINKEY) === '1'; } catch (e) {}
+  function applySkin() { document.body.classList.toggle('skin', skin); var b = $('skinBtn'); if (b) b.setAttribute('aria-pressed', skin ? 'true' : 'false'); }
+  function setMode(m) { mode = m; try { localStorage.setItem(MODEKEY, m); } catch (e) {} document.body.classList.toggle('mode-read', m === 'read'); renderEra(); renderProg(); renderBar(); }
+
+  var cur = 'e1';
+  try { var h = location.hash.replace('#', ''); if (/^e[1-5]$/.test(h)) cur = h; } catch (e) {}
+
+  function eraIdx(id) { for (var i = 0; i < ERAS.length; i++) if (ERAS[i].id === id) return i; return 0; }
+
+  function stats() {
+    var per = [], tot = 0, ans = 0;
+    ERAS.forEach(function (E) {
+      var pts = 0, n = 0;
+      E.items.forEach(function (_, i) {
+        var v = marks[E.id + ':' + i];
+        if (v !== undefined) { n++; pts += v; }
+      });
+      per.push({ pts: pts, n: n }); tot += pts; ans += n;
+    });
+    return { per: per, score: tot, answered: ans };
+  }
+
+  function buildTabs() {
+    var html = '';
+    ERAS.forEach(function (E) {
+      html += '<li role="presentation"><button class="tab ' + E.id + '" role="tab" type="button" id="tab-' + E.id + '" data-era="' + E.id + '" aria-selected="false">' +
+        '<span class="y">' + E.years + '</span><span class="t">' + esc(E.title) + '</span><span class="done" hidden></span></button></li>';
+    });
+    $('tablist').innerHTML = html;
+  }
+
+  function renderEra() {
+    var E = ERAS[eraIdx(cur)], sec = $('era');
+    sec.className = 'era ' + E.id;
+    var html = '';
+    if (mode === 'read') html += '<div class="readhead"><b>解説ページ</b><p>判定おつかれさまでした。ここからは各ネタの「ネタ札」と解説、トピックが読めます。答えはここでも変えられます。</p><div class="rb"><button type="button" id="againRes">結果をもう一度見る</button><button type="button" id="toAnswer">答える画面に戻る</button></div></div>';
+    html += '<div class="era-head"><span class="y">' + E.years + '</span><h2>' + esc(E.title) + '</h2><p>' + esc(E.lead) + '</p></div><ol class="list">';
+    E.items.forEach(function (it, i) {
+      var v = marks[E.id + ':' + i];
+      html += '<li class="item' + (i < 3 ? ' top3' : '') + (v !== undefined ? ' answered' : '') + '" data-y="' + esc(it[1]).replace(/頃/g, '') + '">' +
+        '<span class="rk" data-r="' + (i + 1) + '" data-c2="' + ((i + 2) * 97 % 800 + 120) + '">' + (i + 1) + '<small>位</small></span>' +
+        '<div class="top" data-y="' + esc(it[1]).replace(/頃/g, '') + '" data-lk="' + ((i + 5) * 1931 % 9000 + 800).toLocaleString() + '"><span class="nm">' + esc(it[0]) + '</span><span class="yr" data-n="' + ((i + 1) * 137 % 90 + 10) + '万" data-c="' + ((i + 3) * 311 % 900 + 100) + '" data-m="' + ((i + 7) * 53 % 400 + 30) + '">' + esc(it[1]) + '</span><span class="st ' + it[2] + '">' + ST[it[2]] + '</span></div>' +
+        '<p class="ds" data-y="' + esc(it[1]).replace(/頃/g, '') + '" data-tag="' + esc(it[0]).replace(/[\s\(\)（）!！?？]/g, '') + '" data-rp="' + ((i + 2) * 17 % 60 + 3) + '" data-rt="' + ((i + 4) * 211 % 2000 + 50) + '" data-fv="' + ((i + 6) * 389 % 5000 + 100) + '">' + esc(it[3]) + '</p>' +
+        '<div class="acts" role="group" aria-label="' + esc(it[0]) + ' の回答"><div class="seg">';
+      for (var k = 0; k < 3; k++) {
+        html += '<button type="button" class="ans" data-i="' + i + '" data-v="' + k + '" aria-pressed="' + (v === k ? 'true' : 'false') + '">' + ANS[k] + '</button>';
+      }
+      html += '</div></div>';
+      if (mode === 'read') html += '<div class="det" id="det-' + E.id + '-' + i + '">' + detailHtml(it, E.id + ':' + i, i) + '</div>';
+      html += '</li>';
+    });
+    html += '</ol><div class="world"><h3>同じころ、世界では</h3><ul>';
+    E.world.forEach(function (w) { html += '<li><span class="yr">' + esc(w[0]) + '</span><span>' + esc(w[1]) + '</span></li>'; });
+    html += '</ul></div>';
+    var ni = eraIdx(cur) + 1;
+    html += '<div class="nexts">' + (ni < ERAS.length
+      ? '<button type="button" id="nextEra">次の時代へ（' + ERAS[ni].years + '）→</button>'
+      : (mode === 'read' ? '<button type="button" id="nextEra" data-go="2">結果をもう一度見る</button>' : '<button type="button" id="nextEra" data-go="1">判定する！</button>')) + '</div>';
+    sec.innerHTML = html;
+    syncTabs();
+  }
+
+  function detailHtml(it, key, idx) {
+    var h = vis(key, idx);
+    h += '<div><h4>解説</h4><p>' + esc(it[4]) + '</p></div>';
+    h += '<div><h4>使われ方の例</h4><ul>';
+    it[5].forEach(function (x) { h += '<li>' + esc(x) + '</li>'; });
+    h += '</ul></div>';
+    var tp = TOPIC[key] || [];
+    if (tp.length) { h += '<div class="topic"><h4>トピック</h4><ul>'; tp.forEach(function (x) { h += '<li>' + esc(x) + '</li>'; }); h += '</ul></div>'; }
+    return h;
+  }
+
+  function syncTabs() {
+    var s = stats();
+    [].slice.call($('tablist').querySelectorAll('.tab')).forEach(function (t, idx) {
+      t.setAttribute('aria-selected', t.getAttribute('data-era') === cur ? 'true' : 'false');
+      var d = t.querySelector('.done');
+      d.hidden = s.per[idx].n === 0;
+      d.textContent = s.per[idx].n + '/10';
+    });
+  }
+
+  function renderProg() {
+    var s = stats();
+    $('cnt').textContent = s.answered;
+    var bars = '';
+    ERAS.forEach(function (E, idx) {
+      bars += '<div class="b ' + E.id + '"><i style="width:' + (s.per[idx].n * 10) + '%"></i><span>' + E.years + '：' + s.per[idx].n + '問回答</span></div>';
+    });
+    $('bars').innerHTML = bars;
+    $('bari').style.width = (s.answered * 2) + '%';
+    $('bart').textContent = s.answered === 0 ? 'まだ回答なし' : ('回答 ' + s.answered + '/50　いまのスコア ' + s.score + '点');
+    $('hint').textContent = s.answered === 0
+      ? '時代ごとに10個。全部答えなくても判定できますが、答えるほど正確に正体がばれます。'
+      : s.answered < 50 ? ('あと ' + (50 - s.answered) + ' 個。途中でも「判定する！」で結果が見られます。') : (mode === 'read' ? '全部答えました。ネタ札と解説をどうぞ。' : '全部答えました。「判定する！」でドン！と出ます。');
+    $('go').disabled = s.answered === 0;
+    renderLive(s);
+  }
+
+  /* live preview in the top card: shown until 60% answered, then hidden as ？？？ */
+  var HIDE_AT = 30;
+  function renderLive(s) {
+    var card = $('prog'), ttl = $('lttl'), sub = $('lsub'), lv = $('lv');
+    ttl.classList.remove('q');
+    if (s.answered === 0) {
+      card.className = 'prog e1'; lv.textContent = 'いまの途中判定';
+      ttl.textContent = 'まだ判定前'; sub.textContent = '押していくと、ここが変わります。'; return;
+    }
+    var j = judge();
+    card.className = 'prog ' + j.eraId;
+    if (s.answered >= HIDE_AT) {
+      lv.textContent = '途中判定は6割で封印';
+      ttl.textContent = '？？？'; ttl.classList.add('q');
+      sub.textContent = 'ここから先は下の「判定する！」でドン！と出ます。';
+      return;
+    }
+    lv.textContent = 'いまの途中判定（' + s.answered + '問時点）';
+    ttl.textContent = j.head.title;
+    sub.textContent = 'ランク：' + j.rank + '　スコア ' + s.score + '点。あと ' + (HIDE_AT - s.answered) + ' 問で封印されます。';
+  }
+
+  /* judge */
+  function judge() {
+    var s = stats();
+    var tier = 0;
+    for (var i = 0; i < TIERS.length; i++) if (s.score >= TIERS[i][0]) tier = i;
+    var best = -1, bestP = 0, spread = 0;
+    s.per.forEach(function (p, idx) { if (p.pts > 0) spread++; if (p.pts > bestP) { bestP = p.pts; best = idx; } });
+    var head, eraId;
+    if (s.score === 0) { head = BABY; eraId = 'e3'; }
+    else if (spread >= 4 && bestP <= Math.ceil(s.score / 2)) { head = SPREAD; eraId = ERAS[best].id; }
+    else { head = ERAS[best].age; eraId = ERAS[best].id; }
+    var years = Math.round(s.score / 100 * 27);
+    return { s: s, tier: tier, head: head, eraId: eraId, best: best, years: years, rank: TIERS[tier][1], say: pick(TIERS[tier][2]) };
+  }
+
+  var lastJ = null;
+  /* the overlay is built only when needed and removed on close, so nothing can restore it half-open */
+  function killOverlay() {
+    var old = document.getElementById('ov');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    document.body.style.overflow = '';
+    document.body.classList.remove('ov-open');
+  }
+  function extraLinksHtml() {
+    if (!EXTRA_RESULT_LINKS.length) return '';
+    var h = '<div class="ovextra">';
+    EXTRA_RESULT_LINKS.forEach(function (l) {
+      h += '<a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + (l.note ? '<small>' + esc(l.note) + '</small>' : '') + '</a>';
+    });
+    return h + '</div>';
+  }
+  function buildOverlay() {
+    killOverlay();
+    var ov = document.createElement('div');
+    ov.className = 'ov'; ov.id = 'ov';
+    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'resTitle');
+    ov.innerHTML = '<canvas id="fx"></canvas><div class="ovin"><div class="res" id="res"></div>' +
+      '<div class="ovnote">この枠をスクショして貼ってね　#ネット年齢チェック</div>' +
+      '<div class="sharebar" id="shareBar"></div>' +
+      '<div class="ovbtns"><button type="button" class="era-b" id="toRead">ネタ札と解説を読む →</button><button type="button" class="pri" id="copyRes">結果を文字でコピー</button>' +
+      '<button type="button" id="closeRes">閉じる</button></div>' + extraLinksHtml() + '</div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#closeRes').addEventListener('click', hideResult);
+    ov.querySelector('#toRead').addEventListener('click', function () { hideResult(); setMode('read'); try { window.scrollTo(0, 0); } catch (e) {} });
+    ov.querySelector('#copyRes').addEventListener('click', copyResult);
+    ov.addEventListener('click', function (ev) { if (ev.target === ov) hideResult(); });
+    return ov;
+  }
+  function showResult() {
+    var j = judge(); lastJ = j;
+    buildOverlay();
+    var res = $('res');
+    res.className = 'res ' + j.eraId + ' t' + j.tier;
+    $('ov').classList.add(j.eraId);
+    var html = '<div class="stamp" aria-hidden="true">' + (j.tier === 0 ? '…' : j.tier >= 5 ? '神' : 'ドン！') + '</div>' +
+      '<div class="eyebrow">ネット年齢チェック　判定結果</div>' +
+      '<span class="rank">ランク：' + esc(j.rank) + '</span>' +
+      '<h2 id="resTitle">' + esc(j.head.title) + '</h2>' +
+      '<p class="sub">' + esc(j.head.sub) + '</p>' +
+      '<div class="score"><b>' + j.s.score + '</b><span class="u">スコア / 100　（回答 ' + j.s.answered + '/50' + (j.s.answered < 25 ? '・仮判定' : '') + '）</span><span class="yrs">ネット歴 ' + j.years + ' 年相当</span></div>' +
+      '<div class="bars2">';
+    ERAS.forEach(function (E, idx) {
+      html += '<div class="r ' + E.id + '"><span class="nm">' + E.years + '</span><span class="tr"><i style="width:' + (j.s.per[idx].pts * 5) + '%"></i></span><span class="n">' + j.s.per[idx].pts + '</span></div>';
+    });
+    html += '</div><p class="say">' + esc(j.say) + '</p>' +
+      '<div class="tag"><b>ネット年齢チェック</b><span>#ネット年齢チェック</span></div>';
+    res.innerHTML = html;
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('ov-open');
+    startFx(j);
+    try { if (window.KYOTSU && KYOTSU.shareBar) KYOTSU.shareBar('#shareBar', { text: resultText(j), url: location.href.split('#')[0] }); } catch (e) {}
+    $('closeRes').focus();
+  }
+  function hideResult() {
+    stopFx();
+    killOverlay();
+    lastJ = null;
+    $('go').focus();
+  }
+
+  /* confetti */
+  var fxTimer = null, parts = [], ctx = null;
+  function cssVar(el, n) { return getComputedStyle(el).getPropertyValue(n).trim(); }
+  function startFx(j) {
+    stopFx();
+    var cv = $('fx'), reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    cv.width = cv.clientWidth * (window.devicePixelRatio || 1);
+    cv.height = cv.clientHeight * (window.devicePixelRatio || 1);
+    ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    if (j.tier < 2 || reduce) return;
+    var n = [0, 0, 40, 90, 160, 260][j.tier];
+    var era = cssVar($('res'), '--era') || '#2A66C4';
+    var cols = [era, '#ffffff', era, cssVar(document.documentElement, '--fg') || '#141A22'];
+    if (j.tier >= 5) cols = ['#F3D77A', '#C9962B', '#ffffff', '#FFE9A3', era];
+    parts = [];
+    var W = cv.width, H = cv.height, dpr = window.devicePixelRatio || 1;
+    for (var i = 0; i < n; i++) {
+      parts.push({ x: W / 2 + (Math.random() - .5) * W * .3, y: H * .45, vx: (Math.random() - .5) * 14 * dpr, vy: (-6 - Math.random() * 10) * dpr,
+        w: (4 + Math.random() * 6) * dpr, h: (6 + Math.random() * 8) * dpr, r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3, c: pick(cols), g: 1 });
+    }
+    var frames = 0;
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      var alive = 0;
+      parts.forEach(function (p) {
+        p.vy += .25 * dpr; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        if (p.y < H + 20) alive++;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+      });
+      frames++;
+      if (alive > 0 && frames < 400) fxTimer = requestAnimationFrame(tick); else { ctx.clearRect(0, 0, W, H); fxTimer = null; }
+    }
+    fxTimer = requestAnimationFrame(tick);
+  }
+  function stopFx() { if (fxTimer) { cancelAnimationFrame(fxTimer); fxTimer = null; } if (ctx) { try { ctx.clearRect(0, 0, 9999, 9999); } catch (e) {} } }
+
+  function resultText(j) {
+    return 'ネット年齢チェック 判定：' + j.head.title + '\nランク：' + j.rank + '／スコア ' + j.s.score + '/100（ネット歴 ' + j.years + ' 年相当）\n' + j.say + '\n#ネット年齢チェック';
+  }
+
+  /* events */
+  $('tablist').addEventListener('click', function (ev) {
+    var t = ev.target.closest('.tab'); if (!t) return;
+    cur = t.getAttribute('data-era');
+    try { history.replaceState(null, '', '#' + cur); } catch (e) {}
+    renderEra();
+    scrollToEra();
+  });
+  function scrollToEra() {
+    try {
+      var tabs = document.querySelector('.tabs');
+      var th = tabs ? tabs.getBoundingClientRect().height : 0;
+      var top = $('era').getBoundingClientRect().top + window.pageYOffset - th - 8;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+    } catch (e) {}
+  }
+  $('era').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    if (b.id === 'againRes') { showResult(); return; }
+    if (b.id === 'toAnswer') { setMode('answer'); try { window.scrollTo(0, 0); } catch (e) {} return; }
+    if (b.id === 'nextEra') {
+      if (b.getAttribute('data-go')) { if (stats().answered > 0) showResult(); return; }
+      cur = ERAS[eraIdx(cur) + 1].id;
+      try { history.replaceState(null, '', '#' + cur); } catch (e) {}
+      renderEra();
+      scrollToEra();
+      return;
+    }
+    var i = +b.getAttribute('data-i'), key = cur + ':' + i;
+    if (b.classList.contains('ans')) {
+      var v = +b.getAttribute('data-v');
+      if (marks[key] === v) delete marks[key]; else marks[key] = v;
+      save();
+      var acts = b.parentNode;
+      [].slice.call(acts.querySelectorAll('.ans')).forEach(function (x) { x.setAttribute('aria-pressed', marks[key] === +x.getAttribute('data-v') ? 'true' : 'false'); });
+      b.closest('.item').classList.toggle('answered', marks[key] !== undefined);
+      renderProg(); syncTabs();
+    }
+  });
+  $('go').addEventListener('click', showResult);
+  $('skinBtn').addEventListener('click', function () { skin = !skin; try { localStorage.setItem(SKINKEY, skin ? '1' : '0'); } catch (e) {} applySkin(); });
+  $('goAnswer').addEventListener('click', function () { setMode('answer'); try { window.scrollTo(0, 0); } catch (e) {} });
+  function renderBar() {
+    var read = mode === 'read';
+    $('barpct').hidden = read;
+    $('goAnswer').hidden = !read;
+    $('barin').classList.toggle('two', read);
+    $('go').textContent = read ? '結果をもう一度見る' : '判定する！';
+  }
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && document.getElementById('ov')) hideResult(); });
+  function copyResult() {
+    if (!lastJ) return;
+    var txt = resultText(lastJ), btn = $('copyRes');
+    function done(ok) { btn.textContent = ok ? 'コピーしました' : 'コピーできませんでした'; setTimeout(function () { btn.textContent = '結果を文字でコピー'; }, 1600); }
+    try {
+      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { fallback(); });
+    } catch (e) { fallback(); }
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); var ok = document.execCommand('copy'); document.body.removeChild(ta); done(ok);
+      } catch (e2) { done(false); }
+    }
+  }
+  window.addEventListener('resize', function () { if (document.getElementById('ov') && lastJ) startFx(lastJ); });
+
+  function start() {
+    /* always boot closed: a page update can arrive while the result card is open */
+    killOverlay();
+    document.body.classList.toggle('mode-read', mode === 'read');
+    applySkin();
+    buildTabs();
+    renderEra();
+    renderProg();
+    renderBar();
+  }
+  start();
+  /* if the host restores a stale overlay after boot, remove it again */
+  [300, 1500, 4000].forEach(function (ms) { setTimeout(function () { if (!lastJ) killOverlay(); }, ms); });
+})();
+</script>
+<!-- KYOTSU:START -->
+<script id="kyotsu-config" type="application/json">
+{
+ "site": "【サイト名】",
+ "siteUrl": "../",
+ "termsUrl": "../共通部品/利用規約.html",
+ "authorUrl": "../作者/",
+ "youtube": "",
+ "hashtag": "ネット年齢チェック",
+ "contact": "https://forms.gle/dXekC3iKjd4KUCLa8",
+ "theme": "dark",
+ "position": "br",
+ "aiNote": true,
+ "others": [
+  {
+   "name": "三語おみくじ",
+   "url": "../三語おみくじ/",
+   "kind": "占い"
+  },
+  {
+   "name": "裏三語おみくじ",
+   "url": "../裏三語おみくじ/",
+   "kind": "占い（ホラー）"
+  },
+  {
+   "name": "3分ダービー",
+   "url": "../3分ダービー/",
+   "kind": "一斉ゲーム"
+  },
+  {
+   "name": "てきとう診断所",
+   "url": "../てきとう診断所/",
+   "kind": "診断"
+  },
+  {
+   "name": "ネット年齢チェック",
+   "url": "../ネットミームランキング/",
+   "kind": "ランキング"
+  }
+ ],
+ "float": false,
+ "game": "ネット年齢チェック",
+ "kind": "ランキング",
+ "logo": "素材/logo_clear.png",
+ "bottom": 76,
+ "credits": [
+  {
+   "name": "RocknRoll One / DotGothic16 / Zen Kaku Gothic New（Webフォント）",
+   "author": "Google Fonts",
+   "url": "https://fonts.google.com/",
+   "license": "SIL Open Font License 1.1"
+  }
+ ],
+ "kit": "素材/kit.zip",
+ "haishin": {
+  "footerIn": "#about",
+  "footerCompact": true,
+  "terms": false,
+  "images": [
+   {
+    "heading": "Xカード（X・SNS投稿用 1200×630）"
+   },
+   {
+    "src": "素材/b_dark_card.png",
+    "label": "紺×明朝・暗め"
+   },
+   {
+    "src": "素材/b_light_card.png",
+    "label": "紺×明朝・明るめ"
+   },
+   {
+    "src": "素材/a_dark_card.png",
+    "label": "黄×ピンク・暗め"
+   },
+   {
+    "src": "素材/a_light_card.png",
+    "label": "黄×ピンク・明るめ"
+   },
+   {
+    "src": "素材/c_dark_card.png",
+    "label": "紫「ドン！」・暗め"
+   },
+   {
+    "src": "素材/c_light_card.png",
+    "label": "紫「ドン！」・明るめ"
+   },
+   {
+    "heading": "サムネ（YouTube用 1280×720）"
+   },
+   {
+    "src": "素材/b_dark_thumb.png",
+    "label": "紺×明朝・暗め"
+   },
+   {
+    "src": "素材/b_light_thumb.png",
+    "label": "紺×明朝・明るめ"
+   },
+   {
+    "src": "素材/a_dark_thumb.png",
+    "label": "黄×ピンク・暗め"
+   },
+   {
+    "src": "素材/a_light_thumb.png",
+    "label": "黄×ピンク・明るめ"
+   },
+   {
+    "src": "素材/c_dark_thumb.png",
+    "label": "紫「ドン！」・暗め"
+   },
+   {
+    "src": "素材/c_light_thumb.png",
+    "label": "紫「ドン！」・明るめ"
+   },
+   {
+    "heading": "ロゴ（1024×1024）"
+   },
+   {
+    "src": "素材/b_dark_logo.png",
+    "label": "紺×明朝・暗め（地色あり）"
+   },
+   {
+    "src": "素材/b_light_logo.png",
+    "label": "紺×明朝・明るめ（地色あり）"
+   },
+   {
+    "src": "素材/a_dark_logo.png",
+    "label": "黄×ピンク・暗め（地色あり）"
+   },
+   {
+    "src": "素材/a_light_logo.png",
+    "label": "黄×ピンク・明るめ（地色あり）"
+   },
+   {
+    "src": "素材/c_dark_logo.png",
+    "label": "紫「ドン！」・暗め（地色あり）"
+   },
+   {
+    "src": "素材/c_light_logo.png",
+    "label": "紫「ドン！」・明るめ（地色あり）"
+   },
+   {
+    "src": "素材/b_dark_clear.png",
+    "label": "紺×明朝・暗め（透過）"
+   },
+   {
+    "src": "素材/b_light_clear.png",
+    "label": "紺×明朝・明るめ（透過）"
+   },
+   {
+    "src": "素材/a_dark_clear.png",
+    "label": "黄×ピンク・暗め（透過）"
+   },
+   {
+    "src": "素材/a_light_clear.png",
+    "label": "黄×ピンク・明るめ（透過）"
+   },
+   {
+    "src": "素材/c_dark_clear.png",
+    "label": "紫「ドン！」・暗め（透過）"
+   },
+   {
+    "src": "素材/c_light_clear.png",
+    "label": "紫「ドン！」・明るめ（透過）"
+   },
+   {
+    "heading": "合成用の小物（透過PNG）"
+   },
+   {
+    "src": "素材/parts/3択_知らない.png",
+    "label": "3択「知らない」"
+   },
+   {
+    "src": "素材/parts/3択_知ってる.png",
+    "label": "3択「知ってる」"
+   },
+   {
+    "src": "素材/parts/3択_使ってた.png",
+    "label": "3択「使ってた」"
+   },
+   {
+    "src": "素材/parts/スタンプ_ドン.png",
+    "label": "スタンプ「ドン！」"
+   },
+   {
+    "src": "素材/parts/スタンプ_神.png",
+    "label": "スタンプ「神」"
+   },
+   {
+    "src": "素材/parts/スタンプ_仮判定.png",
+    "label": "スタンプ「仮判定」"
+   },
+   {
+    "src": "素材/parts/称号_1_ネット赤ちゃん.png",
+    "label": "称号 1：ネット赤ちゃん"
+   },
+   {
+    "src": "素材/parts/称号_2_新規垢.png",
+    "label": "称号 2：新規垢"
+   },
+   {
+    "src": "素材/parts/称号_3_ROM専卒業.png",
+    "label": "称号 3：ROM専卒業"
+   },
+   {
+    "src": "素材/parts/称号_4_常連.png",
+    "label": "称号 4：常連"
+   },
+   {
+    "src": "素材/parts/称号_5_古参.png",
+    "label": "称号 5：古参"
+   },
+   {
+    "src": "素材/parts/称号_6_ネットの生き字引.png",
+    "label": "称号 6：ネットの生き字引"
+   },
+   {
+    "src": "素材/parts/称号_7_全時代制覇.png",
+    "label": "称号 7：全時代制覇"
+   },
+   {
+    "src": "素材/parts/吹き出し_あったあった.png",
+    "label": "吹き出し「あったあった」"
+   },
+   {
+    "src": "素材/parts/吹き出し_それな.png",
+    "label": "吹き出し「それな」"
+   },
+   {
+    "src": "素材/parts/吹き出し_草.png",
+    "label": "吹き出し「草」"
+   },
+   {
+    "src": "素材/parts/タグ_ネット年齢チェック.png",
+    "label": "タグ（黄）"
+   },
+   {
+    "src": "素材/parts/タグ_ネット年齢チェック_紺.png",
+    "label": "タグ（紺）"
+   },
+   {
+    "src": "素材/parts/ネット歴_例19.png",
+    "label": "ネット歴 19年（例）"
+   },
+   {
+    "src": "素材/parts/ネット歴_空欄.png",
+    "label": "ネット歴 ○年（空欄）"
+   },
+   {
+    "src": "素材/parts/バッジ_無料3分.png",
+    "label": "バッジ「無料3分」"
+   },
+   {
+    "src": "素材/parts/帯_5時代.png",
+    "label": "5時代の帯"
+   },
+   {
+    "src": "素材/parts/見出し_あなたのネット年齢は_暗い画面用.png",
+    "label": "見出し（暗い画面用）"
+   },
+   {
+    "src": "素材/parts/見出し_あなたのネット年齢は_明るい画面用.png",
+    "label": "見出し（明るい画面用）"
+   }
+  ]
+ },
+ "hideOthers": true
+}
+</script>
+<script>
+/* ================================================================
+   共通部品 kyotsu.js  — 全ゲーム・全ページ共通の「このゲームについて」
+   ----------------------------------------------------------------
+   使い方（組み込む.py が自動でやるので、普段は触らなくてよい）
+     <script id="kyotsu-config" type="application/json">{ ...設定... }<\/script>
+     <script src="kyotsu.js"><\/script>   ← または中身をそのまま埋め込み
+
+   できること
+     ・右下に小さな「ⓘ このゲームについて」ボタンを出す
+     ・押すと注意書き（AI生成・娯楽・個人情報なし・配信OK）、素材クレジット、
+       他のゲーム、制作者・規約へのリンク、URLコピー、Xで紹介、ロゴDL を出す
+     ・window.KYOTSU に部品関数を生やす
+         KYOTSU.open()                       … 画面を開く
+         KYOTSU.shareBar(要素, {text, url})  … 要素の中にシェア5点セットを描く
+         KYOTSU.share({text, url})           … 端末の共有メニュー（無ければコピー）
+   設定の項目は 設定の見本.json を見る。
+   ================================================================ */
+(function () {
+  if (window.KYOTSU && window.KYOTSU.__loaded) return;
+
+  // ---------- 設定 ----------
+  var DEF = {
+    site: "【サイト名】",
+    siteUrl: "../../",
+    termsUrl: "../../共通部品/利用規約.html",
+    authorUrl: "",
+    youtube: "",
+    game: "",
+    gameUrl: "",
+    kind: "ゲーム",          // 占い / ゲーム / 診断 / ランキング / クイズ
+    logo: "",
+    hashtag: "",
+    credits: [],             // [{name, author, url, license}]
+    others: [],              // [{name, url, kind}]
+    position: "br",          // br / bl
+    theme: "dark",           // dark / light
+    aiNote: true,
+    contact: "",
+    bottom: 10,              // ⓘボタンの下からの距離(px)。下に固定バーがあるページは 76 など
+    float: true,             // false にすると右下の浮きボタンを出さない（ページ下のフッターから開く）
+    hideOthers: false,       // true なら「他にもあります」を出さない（他のゲームをまだ公開していないとき）
+    showLogo: false          // true なら「ロゴを保存」を出す（ふだんは配信者案内に任せるので出さない）
+  };
+  var cfg = {};
+  try {
+    var el = document.getElementById("kyotsu-config");
+    if (el) cfg = JSON.parse(el.textContent || "{}");
+  } catch (e) { console.warn("kyotsu-config の読み取りに失敗", e); }
+  var C = {};
+  for (var k in DEF) C[k] = (cfg[k] !== undefined && cfg[k] !== null) ? cfg[k] : DEF[k];
+  if (!C.game) C.game = (document.title || "このページ").trim();
+  if (!C.gameUrl) C.gameUrl = location.href.split("#")[0];
+  // サイト名が未定（【サイト名】のまま・空）なら「親サイトなし」として扱い、サイト名を画面に出さない
+  var hasSite = !!(C.site && !/【|】/.test(C.site));
+  if (!C.hashtag) C.hashtag = hasSite ? C.site.replace(/\s/g, "") : C.game.replace(/\s/g, "");
+
+  var kindWord = ({ "占い": "占い", "診断": "診断", "ランキング": "ランキング", "クイズ": "クイズ" })[C.kind] || "ゲーム";
+  var resultWord = (C.kind === "占い" || C.kind === "診断") ? "占い・診断の結果" : "結果や内容";
+
+  // ---------- 文章（短い版） ----------
+  var NOTES = [];
+  if (C.aiNote) NOTES.push("このページの内容（文章・結果・見た目・プログラム）は、主にAI（人工知能）を使って作られています。間違いや変なところがあるかもしれません。");
+  NOTES.push("この" + kindWord + "は娯楽のためのものです。" + resultWord + "の正しさは保証していません。結果をどう受け取るかはご自身の判断でお願いします。");
+  NOTES.push("本名・住所などの個人情報は求めません。名前はニックネームでどうぞ。ランキングなど共有機能があるページでは、ニックネームとスコアが他の人にも表示されます。");
+  NOTES.push("広告を掲載しています。");
+  NOTES.push("実況・配信・切り抜き・動画への掲載・収益化は、個人・法人を問わずご自由にどうぞ。報告はいりません。ロゴも使ってOKです。ただし素材（音楽など）がどの配信サイトでも問題なく使えることまでは保証していないので、配信でのご利用はご自身の判断でお願いします。");
+
+  // ---------- 見た目 ----------
+  var dark = C.theme !== "light";
+  var css = "\
+#kyotsu-root{position:fixed;z-index:2147483000;letter-spacing:normal;font-family:system-ui,-apple-system,'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif;font-size:14px;line-height:1.6;color:" + (dark ? "#f2f2f2" : "#222") + ";}\
+#kyotsu-root *{box-sizing:border-box;}\
+#kyotsu-btn{position:fixed;" + (C.position === "bl" ? "left:10px" : "right:10px") + ";bottom:" + (parseInt(C.bottom, 10) || 10) + "px;z-index:2147483001;display:inline-flex;align-items:center;gap:6px;padding:7px 12px 7px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.72);color:#fff;font-size:12px;letter-spacing:.02em;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:.78;transition:opacity .2s,transform .2s;box-shadow:0 2px 10px rgba(0,0,0,.25);font-family:inherit;}\
+#kyotsu-btn:hover,#kyotsu-btn:focus-visible{opacity:1;transform:translateY(-1px);outline:none;}\
+#kyotsu-btn i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font-style:normal;font-weight:700;font-size:11px;}\
+#kyotsu-ov{position:fixed;inset:0;z-index:2147483002;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;padding:0;}\
+#kyotsu-ov.on{display:flex;}\
+@media(min-width:640px){#kyotsu-ov{align-items:center;padding:24px;}}\
+#kyotsu-dlg{width:100%;max-width:560px;max-height:min(88vh,760px);overflow:auto;border-radius:18px 18px 0 0;background:" + (dark ? "#17171c" : "#fff") + ";border:1px solid " + (dark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)") + ";box-shadow:0 20px 60px rgba(0,0,0,.45);padding:18px 18px 22px;animation:kyotsu-up .22s ease-out;}\
+@media(min-width:640px){#kyotsu-dlg{border-radius:18px;padding:22px 24px 26px;}}\
+@keyframes kyotsu-up{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}\
+#kyotsu-dlg h2{margin:0 0 2px;font-size:18px;font-weight:700;letter-spacing:.01em;}\
+#kyotsu-dlg .k-sub{margin:0 0 14px;font-size:12px;opacity:.65;}\
+#kyotsu-dlg h3{margin:18px 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.6;}\
+#kyotsu-dlg ul{margin:0;padding-left:1.2em;}\
+#kyotsu-dlg li{margin:4px 0;font-size:13px;opacity:.92;}\
+#kyotsu-dlg a{color:" + (dark ? "#9ec5ff" : "#1a5fd0") + ";text-decoration:none;}\
+#kyotsu-dlg a:hover{text-decoration:underline;}\
+#kyotsu-x{position:sticky;top:0;float:right;margin:-6px -6px 0 0;width:34px;height:34px;border-radius:50%;border:0;background:" + (dark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.06)") + ";color:inherit;font-size:18px;cursor:pointer;font-family:inherit;}\
+.k-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}\
+.k-b{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;min-height:46px;border-radius:12px;font-weight:700;border:1px solid " + (dark ? "rgba(255,255,255,.16)" : "rgba(0,0,0,.14)") + ";background:" + (dark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.04)") + ";color:inherit;font-size:13px;cursor:pointer;text-decoration:none!important;font-family:inherit;}\
+.k-b:hover{background:" + (dark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.08)") + ";}\
+.k-b.k-pri{background:" + (dark ? "#f2f2f2" : "#222") + ";color:" + (dark ? "#111" : "#fff") + ";border-color:transparent;}\
+.k-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}\
+.k-card{display:block;padding:10px 12px;border-radius:12px;border:1px solid " + (dark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)") + ";background:" + (dark ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)") + ";color:inherit!important;text-decoration:none!important;}\
+.k-card b{display:block;font-size:13px;}\
+.k-card small{opacity:.6;font-size:11px;}\
+.k-cred{font-size:12px;opacity:.85;}\
+.k-cred li{margin:2px 0;}\
+.k-foot{margin-top:18px;padding-top:12px;border-top:1px solid " + (dark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.08)") + ";font-size:11px;opacity:.6;display:flex;flex-wrap:wrap;gap:6px 14px;}\
+.k-foot a{color:inherit!important;}\
+#kyotsu-toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:2147483003;background:#111;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 4px 16px rgba(0,0,0,.35);}\
+#kyotsu-toast.on{opacity:1;}\
+.k-share{display:flex;flex-wrap:wrap;gap:8px;}\
+.k-share .k-b{font-size:13px;}\
+";
+
+  // ---------- 部品 ----------
+  function h(tag, attrs, children) {
+    var e = document.createElement(tag);
+    if (attrs) for (var a in attrs) {
+      if (a === "text") e.textContent = attrs[a];
+      else if (a === "html") e.innerHTML = attrs[a];
+      else if (a.indexOf("on") === 0) e.addEventListener(a.slice(2), attrs[a]);
+      else e.setAttribute(a, attrs[a]);
+    }
+    (children || []).forEach(function (c) { if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function esc(s) { return String(s == null ? "" : s); }
+
+  var toastEl;
+  function toast(msg) {
+    if (!toastEl) { toastEl = h("div", { id: "kyotsu-toast" }); document.body.appendChild(toastEl); }
+    toastEl.textContent = msg; toastEl.classList.add("on");
+    clearTimeout(toastEl._t); toastEl._t = setTimeout(function () { toastEl.classList.remove("on"); }, 1800);
+  }
+  function copy(text) {
+    return (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
+      .catch(function () {
+        var t = document.createElement("textarea"); t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+        document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (e) { } document.body.removeChild(t);
+      }).then(function () { toast("コピーしました"); });
+  }
+  function shareText(o) {
+    o = o || {};
+    var text = o.text || ("「" + C.game + "」で遊んだ！");
+    var url = o.url || C.gameUrl;
+    var tag = C.hashtag ? " #" + C.hashtag : "";
+    return { text: text, url: url, full: text + tag + "\n" + url };
+  }
+  function xUrl(o) { var s = shareText(o); return "https://twitter.com/intent/tweet?text=" + encodeURIComponent(s.text + (C.hashtag ? " #" + C.hashtag : "")) + "&url=" + encodeURIComponent(s.url); }
+  function lineUrl(o) { var s = shareText(o); return "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(s.url) + "&text=" + encodeURIComponent(s.text); }
+  function nativeShare(o) {
+    var s = shareText(o);
+    if (navigator.share) return navigator.share({ title: C.game, text: s.text, url: s.url }).catch(function () { });
+    return copy(s.full);
+  }
+  function shareBar(container, o) {
+    if (typeof container === "string") container = document.querySelector(container);
+    if (!container) return;
+    var box = h("div", { class: "k-share" }, [
+      h("a", { class: "k-b", href: xUrl(o), target: "_blank", rel: "noopener", text: "Xに投稿" }),
+      h("a", { class: "k-b", href: lineUrl(o), target: "_blank", rel: "noopener", text: "LINEで送る" }),
+      h("button", { class: "k-b", type: "button", text: "URLをコピー", onclick: function () { copy(shareText(o).url); } }),
+      (o && o.image) ? h("a", { class: "k-b", href: o.image, download: (C.game + "_結果.png"), text: "画像を保存" }) : null,
+      h("button", { class: "k-b", type: "button", text: "共有…", onclick: function () { nativeShare(o); } })
+    ]);
+    container.innerHTML = ""; container.appendChild(box);
+    return box;
+  }
+
+  // ---------- 画面 ----------
+  var root, ov;
+  function build() {
+    if (root) return;
+    root = h("div", { id: "kyotsu-root" });
+    root.appendChild(h("style", { text: css }));
+
+    var btn = h("button", { id: "kyotsu-btn", type: "button", "aria-label": "このゲームについて", onclick: open }, [h("i", { text: "i" }), "この" + kindWord + "について"]);
+    if (C.float !== false) root.appendChild(btn);
+
+    var others = C.hideOthers ? [] : (C.others || []).filter(function (g) { return g && g.name && g.name !== C.game; }).slice(0, 6);
+    var creds = C.credits || [];
+
+    var dlg = h("div", { id: "kyotsu-dlg", role: "dialog", "aria-modal": "true", "aria-label": C.game + " について" }, [
+      h("button", { id: "kyotsu-x", type: "button", "aria-label": "閉じる", text: "×", onclick: close }),
+      h("h2", { text: C.game }),
+      h("p", { class: "k-sub", text: hasSite ? (C.site + " の" + kindWord) : ("無料で遊べる" + kindWord + "（登録なし）") }),
+
+      h("div", { class: "k-row" }, [
+        h("button", { class: "k-b k-pri", type: "button", text: "URLをコピー", onclick: function () { copy(C.gameUrl); } }),
+        h("a", { class: "k-b", href: xUrl(), target: "_blank", rel: "noopener", text: "Xで紹介" }),
+        (C.logo && C.showLogo) ? h("a", { class: "k-b", href: C.logo, download: (C.game + "_ロゴ"), text: "ロゴを保存" }) : null,
+        C.youtube ? h("a", { class: "k-b", href: C.youtube, target: "_blank", rel: "noopener", text: "作者のYouTube" }) : null
+      ]),
+
+      h("h3", { text: "おことわり" }),
+      h("ul", null, NOTES.map(function (n) { return h("li", { text: n }); })),
+
+      creds.length ? h("h3", { text: "使わせてもらった素材" }) : null,
+      creds.length ? h("ul", { class: "k-cred" }, creds.map(function (c) {
+        var parts = [esc(c.name)];
+        if (c.author) parts.push("／" + esc(c.author));
+        if (c.license) parts.push("（" + esc(c.license) + "）");
+        return h("li", null, [c.url ? h("a", { href: c.url, target: "_blank", rel: "noopener", text: parts.join("") }) : parts.join("")]);
+      })) : null,
+
+      others.length ? h("h3", { text: "他にもあります" }) : null,
+      others.length ? h("div", { class: "k-grid" }, others.map(function (g) {
+        return h("a", { class: "k-card", href: g.url }, [h("b", { text: g.name }), g.kind ? h("small", { text: g.kind }) : null]);
+      })) : null,
+
+      h("div", { class: "k-foot" }, [
+        hasSite ? h("a", { href: C.siteUrl, text: C.site + " トップ" }) : null,
+        (C.authorUrl && hasSite) ? h("a", { href: C.authorUrl, text: "作者について" }) : null,   // 親サイトが無いうちは作者ページも無い
+        C.termsUrl ? h("a", { href: C.termsUrl, text: "利用規約・プライバシー" }) : null,
+        C.contact ? h("a", { href: C.contact, target: "_blank", rel: "noopener", text: "お問い合わせ" }) : null,
+        hasSite ? h("span", { text: "© " + C.site }) : null
+      ])
+    ]);
+    ov = h("div", { id: "kyotsu-ov", onclick: function (e) { if (e.target === ov) close(); } }, [dlg]);
+    root.appendChild(ov);
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && ov.classList.contains("on")) close(); });
+    document.body.appendChild(root);
+  }
+  function open() { build(); ov.classList.add("on"); var x = document.getElementById("kyotsu-x"); if (x) x.focus(); }
+  function close() { if (ov) ov.classList.remove("on"); }
+
+  function init() { build(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+
+  window.KYOTSU = { __loaded: true, config: C, open: open, close: close, shareBar: shareBar, share: nativeShare, copy: copy, toast: toast, xUrl: xUrl, lineUrl: lineUrl };
+})();
+
+</script>
+<script>
+/* 配信者ボタン（共通部品）
+   どのページにも付けられる「配信・動画で使う方へ」ボタン＋ポップアップ。
+   ふだんは 組み込む.py が kyotsu.js と一緒に自動で埋め込むので、手で触らなくてよい。
+   そのとき設定（ゲーム名・ロゴ・規約・URL・問い合わせ先）は kyotsu の設定JSON（#kyotsu-config）から自動で拾う。
+   設定JSONに "haishin": {"pos":"left","bottom":76,"inline":"#id","hide":false} を足すと位置などを変えられる。
+   "haishin": {"footer": false} でページ下のフッター（規約の短い版・配信者案内・素材クレジットへの大きな入口）を出さない。既定は出す。
+   "haishin": {"footerIn": "#about", "footerTitle": "利用規約・配信で使う方へ"} で、フッターをページ本文の中（指定した要素の末尾）に
+     折りたたみ（details）として置く。ページ自身の「このゲームについて」の折りたたみと並べたいときに使う。見た目はページ側の .sb-foot.sb-in で寄せられる。
+   "haishin": {"images": [{"src":"…","label":"…"}, {"heading":"見出し"}, …]} で素材一覧を差し替え。heading だけの項目は小見出しになる。
+   "haishin": {"terms": false} で「規約ページを読む」を出さない（規約ページをまだ置いていないとき）。
+   "haishin": {"giftTitle": "…", "giftText": "…"} で素材一覧の前の案内文（「素材配布してます！以下からどうぞ！」）を差し替え。"moreTitle" で最後の注意書きの見出し（「知っておいてほしいこと」。最初から開いている）。
+   "haishin": {"footerIn": "#about", "footerCompact": true} なら、規約の5行は出さずボタン2つだけ（「配信・動画で使う方へ」「利用規約・このゲームについて」）。
+     規約の短い版と利用規約リンクは「利用規約・このゲームについて」（ⓘ）の中にある。読む予定のない人の目に入れたくないページ向け。
+   既定では浮きボタンは出ない（フッターだけ）。浮きボタンも出したいときは "haishin": {"float": true}。
+
+   単体で使うとき（本体HTMLの、body の閉じタグの直前に1行）:
+   <script src="../共通部品/配信者ボタン.js"
+           data-game="ネットミーム年代記"              … ゲーム名
+           data-logo="素材/ロゴ_透過_1024.png"          … ロゴのパス（任意。あれば「ロゴをダウンロード」が出る）
+           data-kit="素材/kit.zip"                      … 素材一式のzip（任意。あれば「素材一式をダウンロード」が出る。設定JSONなら "kit"）
+           data-terms="../規約.html"                    … 規約ページ（任意。あれば「規約ページを読む」が出る）
+           data-url="https://example.com/game/"         … 共有用URL（任意。無ければ今のページのURL）
+           data-contact="xxx@example.com"               … 問い合わせ先（任意）
+           data-pos="right" data-bottom="16"            … ボタンの位置（right / left）と下からの距離px（任意。下に固定バーがあるページは 80 など）
+           data-inline="#stream-button"                 … 浮かせず、指定した要素の中にボタンを置きたいとき（任意）
+   ><\/script>
+   依存なし。見た目は自前のCSSだけで完結。ページ側のCSSの影響を受けにくいよう、全部 sb- で始まるクラスにしている。
+   kyotsu.js（「このゲームについて」）が同じページにあれば、ボタンは反対側の隅に出て、ポップアップから「このゲームについて」も開ける。 */
+(function () {
+  var s = document.currentScript;
+  var d = (s && s.dataset) || {};
+  // kyotsu の設定JSONがあれば、そこから既定値を拾う
+  var K = {};
+  try { var kc = document.getElementById('kyotsu-config'); if (kc) K = JSON.parse(kc.textContent || '{}') || {}; } catch (e) { K = {}; }
+  var H = K.haishin || {};
+  if (H.hide) return;
+  var kyotsuPos = K.position === 'bl' ? 'left' : 'right';         // kyotsu のボタンがいる側
+  var defaultPos = document.getElementById('kyotsu-config') ? (kyotsuPos === 'right' ? 'left' : 'right') : 'right';
+  var IMGS = H.images || (function () {
+    var dir = (d.logo || K.logo || '').replace(/[^\/]*$/, '');   // ロゴと同じフォルダ（例: 素材/）
+    if (!dir && !(d.logo || K.logo)) return [];
+    return [{ src: dir + 'logo_dark.png', label: 'ロゴ（暗い画面用）' }, { src: dir + 'logo_light.png', label: 'ロゴ（明るい画面用）' }, { src: dir + 'logo_clear.png', label: 'ロゴ（透過）' },
+            { src: dir + 'card.png', label: 'Xカード' }, { src: dir + 'thumb.png', label: 'サムネ' }, { src: dir + 'parts/一覧.png', label: '合成用の小物（一覧）' }];
+  })();
+  var cfg = {
+    game: d.game || K.game || document.title || 'このゲーム',
+    logo: d.logo || K.logo || '',
+    kit: d.kit || K.kit || '',          // 配信者向けの素材一式（zip）。あれば「素材一式をダウンロード」が出る
+    terms: d.terms || K.termsUrl || '',
+    url: d.url || K.gameUrl || location.href.split('#')[0],
+    contact: d.contact || K.contact || '',
+    pos: (d.pos || H.pos || defaultPos) === 'left' ? 'left' : 'right',
+    bottom: parseInt(d.bottom || H.bottom || K.bottom || (document.getElementById('kyotsu-config') ? '10' : '16'), 10),
+    inline: d.inline || H.inline || ''
+  };
+
+  var css = [
+    '.sb-btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;',
+    'font:700 14px/1 "Zen Kaku Gothic New","Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;color:#fff;background:#1b1f2a;',
+    'border:2px solid rgba(255,255,255,.25);border-radius:999px;padding:10px 16px;box-shadow:0 6px 18px rgba(0,0,0,.35)}',
+    '.sb-btn:hover{background:#2a3040}.sb-btn:focus-visible{outline:3px solid #ffd166;outline-offset:2px}',
+    '.sb-btn .sb-dot{width:10px;height:10px;border-radius:50%;background:#ff3fa4;box-shadow:0 0 0 4px rgba(255,63,164,.25)}',
+    '.sb-float{position:fixed;z-index:9990}',
+    '.sb-back{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;display:none;align-items:center;justify-content:center;padding:16px}',
+    '.sb-back.sb-open{display:flex}',
+    '.sb-modal{box-sizing:border-box;width:min(560px,100%);max-height:90vh;overflow:auto;background:#fff;color:#1b1f2a;border-radius:18px;',
+    'padding:22px 22px 18px;font:400 15px/1.7 "Zen Kaku Gothic New","Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.4)}',
+    '.sb-modal *{box-sizing:border-box}',
+    '.sb-h{font-size:19px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:8px}',
+    '.sb-h .sb-dot{width:10px;height:10px;border-radius:50%;background:#ff3fa4}',
+    '.sb-sub{margin:0 0 14px;color:#5b6170;font-size:13px}',
+    '.sb-ok,.sb-ng{margin:0 0 12px;padding:12px 14px;border-radius:12px;list-style:none}',
+    '.sb-ok{background:#eefaf3}.sb-ng{background:#fdf1f3}',
+    '.sb-ok li,.sb-ng li{padding-left:1.6em;position:relative;margin:2px 0}',
+    '.sb-ok li::before{content:"OK";position:absolute;left:0;top:.2em;font-size:11px;font-weight:700;color:#1f9d55}',
+    '.sb-ng li::before{content:"NG";position:absolute;left:0;top:.2em;font-size:11px;font-weight:700;color:#d64561}',
+    '.sb-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 8px}',
+    '.sb-a{all:unset;box-sizing:border-box;cursor:pointer;font:700 15px/1.3 inherit;padding:14px 16px;border-radius:12px;background:#1b1f2a;color:#fff;text-decoration:none;text-align:center;min-height:48px;display:flex;align-items:center;justify-content:center}',
+    '.sb-foot .sb-fa .sb-a,.sb-modal .sb-acts .sb-a{text-align:center}',
+    '.sb-a.sb-2{background:#eef0f5;color:#1b1f2a}.sb-a:focus-visible{outline:3px solid #ffd166}',
+    '.sb-more{margin-top:6px;border-top:1px solid #e6e8ee;padding-top:8px}',
+    '.sb-more{margin-top:14px}.sb-more summary{cursor:pointer;font-weight:700;color:#1b1f2a;padding:6px 0;font-size:15px}',
+    '.sb-more p{margin:6px 0;font-size:14px;color:#3c4150}',
+    '.sb-close{position:sticky;top:0;float:right;all:unset;cursor:pointer;font-size:22px;line-height:1;padding:4px 8px;color:#5b6170}',
+    '.sb-close:focus-visible{outline:3px solid #ffd166}',
+    '.sb-note{font-size:12px;color:#7a8090;margin:10px 0 0}',
+    '.sb-h3{font-size:14px;font-weight:700;margin:14px 0 6px}',
+    '.sb-gift{margin:22px 0 10px;padding:12px 14px;border-radius:12px;background:#fff8e6;border:1px solid #f1d58a;border-left:5px solid #f0b429;position:relative}',
+    '.sb-gift::before{content:"";position:absolute;left:0;right:0;top:-12px;border-top:1px solid #e6e8ee}',
+    '.sb-gift b{display:block;font-size:16px;font-weight:900;margin-bottom:3px}.sb-gift span{display:block;font-size:13px;color:#5b6170;line-height:1.6}',
+    '.sb-imgs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}',
+    '.sb-imgs a{display:block;text-decoration:none;color:inherit;font-size:11px;line-height:1.3;text-align:center;cursor:zoom-in}',
+    '.sb-imgs .sb-gh{grid-column:1/-1;font-size:13px;font-weight:700;margin:8px 0 0;color:#5b6170}',
+    '.sb-view{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:16px}',
+    '.sb-view.sb-open{display:flex}.sb-view .sb-vbox{background:#fff;color:#1b1f2a;border-radius:16px;padding:14px;max-width:min(720px,100%);width:100%;max-height:92vh;overflow:auto;text-align:center}',
+    '.sb-view img{max-width:100%;max-height:60vh;object-fit:contain;background:repeating-conic-gradient(#b9bec8 0 25%,#d9dce3 0 50%) 0 0/16px 16px;border-radius:10px;border:1px solid #c9cdd6}',
+    '@media (prefers-color-scheme:dark){.sb-imgs img,.sb-view img{background:repeating-conic-gradient(#3a4050 0 25%,#4b5264 0 50%) 0 0/16px 16px;border-color:#4b5264}}',
+    '.sb-view .sb-vl{font-weight:700;margin:8px 0 4px}.sb-view .sb-vn{font-size:13px;color:#5b6170;margin:0 0 10px}.sb-view .sb-acts{grid-template-columns:1fr 1fr;margin:0}',
+    '.sb-confirm{grid-column:1/-1;background:#fff7e0;border:1px solid #f1d58a;border-radius:12px;padding:12px 14px;font-size:14px;color:#1b1f2a}.sb-confirm .sb-acts{margin:10px 0 0}',
+    '.sb-foot .sb-a.sb-banner{grid-column:1/-1;width:100%;justify-content:flex-start;gap:14px;padding:14px 18px;border:1px solid rgba(255,255,255,.14);border-left:5px solid #ff3fa4;background:#1b1f2a;color:#fff;border-radius:10px;text-align:left}',
+    '.sb-foot .sb-a.sb-banner:hover{background:#242938}',
+    '.sb-foot .sb-a.sb-banner b{display:block;font-size:17px;font-weight:900;letter-spacing:.02em;line-height:1.3}',
+    '.sb-foot .sb-a.sb-banner .sb-dot{display:none}',
+    '.sb-foot .sb-a.sb-banner .sb-tag{flex:none;font-size:11px;font-weight:900;letter-spacing:.08em;color:#fff;background:#ff3fa4;border-radius:6px;padding:3px 7px;line-height:1.2}',
+    '.sb-foot .sb-a.sb-banner small{display:block;font-weight:400;font-size:12.5px;opacity:.75;margin-top:3px;line-height:1.5}',
+    '.sb-foot .sb-fa{display:grid;grid-template-columns:1fr;gap:10px}',
+    '.sb-imgs img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:repeating-conic-gradient(#b9bec8 0 25%,#d9dce3 0 50%) 0 0/16px 16px;border-radius:8px;border:1px solid #c9cdd6;margin-bottom:3px}',
+    '.sb-foot{box-sizing:border-box;margin:24px 0 0;padding:22px 18px;border-top:3px solid #1b1f2a;background:#f4f5f8;color:#1b1f2a;',
+    'font:400 15px/1.75 "Zen Kaku Gothic New","Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif}',
+    '.sb-foot .sb-fin{margin:0 auto;max-width:var(--sb-maxw,42rem)}.sb-foot *{box-sizing:border-box}.sb-foot h2{margin:0 0 8px;font-size:20px;font-weight:700}',
+    '.sb-foot ul{margin:0 0 14px;padding-left:1.3em}.sb-foot li{margin:3px 0}',
+    '.sb-foot .sb-fa{display:flex;flex-wrap:wrap;gap:10px}',
+    '.sb-foot .sb-a{font-size:15px;padding:13px 16px}.sb-foot .sb-a.sb-1{background:#1b1f2a;color:#fff}',
+    '.sb-foot .sb-fs{margin:16px 0 0;font-size:14px;color:#5b6170}.sb-foot .sb-terms{color:inherit;text-decoration:underline}',
+    '.sb-foot.sb-in{margin:10px 0 0;padding:10px 14px;border:1px solid rgba(128,128,128,.35);border-top-width:1px;border-radius:8px;background:transparent;color:inherit;font:inherit}',
+    '.sb-foot.sb-compact{padding:0;border:0;background:transparent;margin:10px 0 0}.sb-foot.sb-compact .sb-fa{gap:8px}.sb-foot.sb-compact .sb-a{font-size:14px;padding:11px 14px;border-radius:999px}',
+    '.sb-foot.sb-in summary{font-weight:700;cursor:pointer;min-height:1.8rem;list-style:revert}.sb-foot.sb-in ul{margin:8px 0 10px;font-size:.95em;max-width:36rem}.sb-foot.sb-in .sb-fs{color:inherit;opacity:.75}',
+    '@media (prefers-color-scheme:dark){.sb-foot.sb-in{background:transparent;color:inherit}}',
+    '@media (prefers-color-scheme:dark){.sb-foot{background:#171a23;color:#eef0f5;border-top-color:#3a4050}.sb-foot .sb-fs{color:#aab0c0}',
+    '.sb-foot .sb-a.sb-1{background:#eef0f5;color:#1b1f2a}}',
+    '@media (prefers-color-scheme:dark){.sb-modal{background:#171a23;color:#eef0f5}.sb-h{color:#fff}.sb-sub{color:#aab0c0}',
+    '.sb-ok{background:#143022}.sb-ng{background:#3a1c24}.sb-a.sb-2{background:#2a3040;color:#fff}.sb-more{border-color:#2a3040}',
+    '.sb-more summary{color:#fff}.sb-more p{color:#c8cdda}.sb-close{color:#aab0c0}.sb-gift{background:#2d2a1c;border-color:#5a4d22;border-left-color:#f0b429}.sb-gift::before{border-top-color:#2a3040}.sb-gift span{color:#c8cdda}.sb-view .sb-vbox{background:#171a23;color:#eef0f5}.sb-view .sb-vn{color:#aab0c0}.sb-confirm{background:#3a3220;border-color:#6b5a2a;color:#eef0f5}.sb-imgs .sb-gh{color:#aab0c0}}'
+  ].join('');
+  var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // ボタン
+  var btn = el('button', 'sb-btn', '<span class="sb-dot"></span>配信・動画で使う方へ');
+  btn.type = 'button'; btn.setAttribute('aria-haspopup', 'dialog');
+  var host = cfg.inline ? document.querySelector(cfg.inline) : null;
+  var showFloat = H.float === true || H.footer === false;   // 既定：ページ下のフッターに置き、浮きボタンは出さない（つきまとわない）
+  if (host) { host.appendChild(btn); }
+  else if (!showFloat) { /* 浮きボタンなし */ }
+  else { btn.classList.add('sb-float'); btn.style[cfg.pos] = '16px'; btn.style.bottom = cfg.bottom + 'px'; document.body.appendChild(btn); }
+
+  // 同じページで2回読み込まれたら、ポップアップは最初の1つを使い回す（ボタンだけ増える）
+  if (window.__sbOpen) { btn.addEventListener('click', window.__sbOpen); return; }
+
+  // ポップアップ
+  var back = el('div', 'sb-back');
+  var modal = el('div', 'sb-modal'); modal.setAttribute('role', 'dialog'); modal.setAttribute('aria-modal', 'true'); modal.setAttribute('aria-labelledby', 'sb-title');
+  var g = esc(cfg.game);
+  modal.innerHTML =
+    '<button class="sb-close" type="button" aria-label="閉じる">×</button>' +
+    '<h2 class="sb-h" id="sb-title"><span class="sb-dot"></span>配信・動画で使う方へ</h2>' +
+    '<p class="sb-sub">本サイトは、個人・法人を問わず、実況・配信・切り抜き・スクショ投稿に自由に使えます。許諾の連絡は不要です。</p>' +
+    '<ul class="sb-ok">' +
+      '<li>YouTube・Twitch などの公式機能での収益化もOK</li>' +
+      '<li>ロゴ・画像素材は、このゲームのサムネや紹介に自由に使えます</li>' +
+      '<li>動画タイトルや概要欄にゲーム名を入れてもらえると助かります</li>' +
+    '</ul>' +
+    '<ul class="sb-ng">' +
+      '<li>ゲーム本体の転載・改変・自分のサイトへの埋め込み</li>' +
+      '<li>素材を別の作品の紹介や、関係ない商品の宣伝に使うこと</li>' +
+      '<li>このゲームの公式・制作者を名乗ること</li>' +
+    '</ul>' +
+    '<div class="sb-gift"><b>' + esc(H.giftTitle || '素材配布してます！以下からどうぞ！') + '</b><span>' + esc(H.giftText || 'サムネ・配信画面・告知画像に、そのまま使えます。画像を押すと大きく表示され、「この画像を保存」で保存できます（長押し／右クリックでも）。') + '</span></div>' +
+    '<div class="sb-imgs">' + IMGS.map(function (im, i) { if (im.heading) return '<div class="sb-gh">' + esc(im.heading) + '</div>'; return '<a href="' + esc(im.src) + '" class="sb-im" data-i="' + i + '" title="' + esc(im.label) + '"><img src="' + esc(im.src) + '" alt="' + esc(im.label) + '" loading="lazy" onerror="this.parentNode.style.display=\'none\'"><span>' + esc(im.label) + '</span></a>'; }).join('') + '</div>' +
+    '<div class="sb-acts">' +
+      (cfg.kit ? '<button class="sb-a sb-2 sb-kit" type="button">まとめて保存（zip）</button>' : '') +
+      '<button class="sb-a sb-2 sb-copy" type="button">ゲームのURLをコピー</button>' +
+      (cfg.terms && H.terms !== false ? '<a class="sb-a sb-2" href="' + esc(cfg.terms) + '">規約ページを読む</a>' : '') +
+      '<button class="sb-a sb-2 sb-about" type="button" style="display:none">このゲームについて（素材・他のゲーム）</button>' +
+    '</div>' +
+    '<details class="sb-more" open><summary>' + esc(H.moreTitle || '知っておいてほしいこと') + '</summary>' +
+      '<p>・結果は娯楽目的のもので、内容の正しさは保証していません。</p>' +
+      '<p>・本名などの個人情報は求めていません。名前欄はニックネームでどうぞ。ランキングなど共有機能があるページでは、ニックネームとスコアが他の人にも表示されます。</p>' +
+      '<p>・BGM・効果音・フォントは、配信での利用を想定した素材を選ぶようにしていますが、すべての素材がどの配信サイトでも問題なく使えることを保証するものではありません。権利者からの申し立て（Content ID など）や、それによる動画・収益への影響について、制作者は責任を負いかねます。</p>' +
+    '</details>' +
+    '<p class="sb-note">この案内はサイト内の全ゲーム共通です。</p>';
+  back.appendChild(modal); document.body.appendChild(back);
+
+  // ページ下のフッター：規約の短い版と、配信者案内・素材クレジットへの大きな入口（小さな浮きボタンだけだと見落とされるため）
+  if (H.footer !== false) {
+    var footHost = H.footerIn ? document.querySelector(H.footerIn) : null;   // 本文の中に置く指定
+    var compact = !!H.footerCompact;                                           // ボタン2つだけ（規約の5行は出さない）
+    var foot = el(compact ? 'div' : (footHost ? 'details' : 'section'), 'sb-foot' + (footHost ? ' sb-in' : '') + (compact ? ' sb-compact' : ''));
+    foot.setAttribute('aria-label', 'このゲームについて');
+    foot.innerHTML = compact ?
+      '<div class="sb-fa">' +
+        '<button class="sb-a sb-1 sb-banner sb-fopen" type="button"><span class="sb-tag">配信OK</span><span><b>配信・動画で使う方へ</b><small>許諾の連絡は不要。ロゴ・サムネ・小物の素材もここから</small></span></button>' +
+        '<button class="sb-a sb-2 sb-fabout" type="button" style="display:none">利用規約・このゲームについて</button>' +
+        (cfg.terms ? '<a class="sb-a sb-2 sb-fterms" href="' + esc(cfg.terms) + '" style="display:none">利用規約・プライバシー</a>' : '') +
+      '</div>' :
+      '<div class="sb-fin">' +
+      (footHost ? '<summary>' + esc(H.footerTitle || 'このゲームについて（規約・配信で使う方へ）') + '</summary>' : '<h2>このゲームについて</h2>') +
+      '<ul>' +
+        '<li>このページは主にAI（人工知能）を使って作られています。間違いがあるかもしれません。</li>' +
+        '<li>結果は娯楽のためのものです。内容の正しさは保証していません。</li>' +
+        '<li>本名などの個人情報は求めません。名前はニックネームでどうぞ。ランキングがあるページでは、ニックネームとスコアが他の人にも表示されます。</li>' +
+        '<li>広告を掲載しています。</li>' +
+        '<li>実況・配信・切り抜き・収益化は自由です。報告はいりません（素材の詳細は下のボタンから）。</li>' +
+      '</ul>' +
+      '<div class="sb-fa">' +
+        '<button class="sb-a sb-1 sb-fopen" type="button">配信・動画で使う方へ</button>' +
+        '<button class="sb-a sb-2 sb-fabout" type="button" style="display:none">素材クレジット・他のゲーム</button>' +
+      '</div>' +
+      (cfg.terms ? '<p class="sb-fs"><a class="sb-terms" href="' + esc(cfg.terms) + '">利用規約・プライバシー（問い合わせ先もこちら）</a></p>' : '') +
+      '</div>';
+    // 本文の段と同じ幅にそろえる：設定 width があればそれ、無ければ本文の一番外の箱の幅を測る
+    var fw = H.width || K.width;
+    if (!fw) {
+      var kids = document.body.children, best = 0;
+      for (var i = 0; i < kids.length; i++) {
+        var c = kids[i]; if (/^(SCRIPT|STYLE|LINK)$/.test(c.tagName) || /\b(sb-|kyotsu)/.test(c.className + ' ' + c.id)) continue;
+        var r = c.getBoundingClientRect(); if (r.width > best && r.width < window.innerWidth - 16) best = r.width;
+      }
+      if (best >= 280) fw = Math.round(best) + 'px';
+    }
+    if (fw && !footHost) foot.style.setProperty('--sb-maxw', fw);
+    if (footHost) { footHost.appendChild(foot); }
+    else { document.body.appendChild(foot); foot.style.paddingBottom = (cfg.bottom + 24) + 'px'; }   // 下の固定バーや浮きボタンに隠れないように
+    var fa = foot.querySelector('.sb-fabout');
+    var ft = foot.querySelector('.sb-fterms');
+    function wireAbout() { if (window.KYOTSU && window.KYOTSU.open) { fa.style.display = ''; fa.onclick = function () { window.KYOTSU.open(); }; return true; } return false; }
+    if (!wireAbout()) { document.addEventListener('DOMContentLoaded', function () { if (!wireAbout() && ft) ft.style.display = ''; }); }
+  }
+
+  var lastFocus = null;
+  function open() {
+    lastFocus = document.activeElement; back.classList.add('sb-open'); modal.querySelector('.sb-close').focus(); document.addEventListener('keydown', onKey);
+    var ab = modal.querySelector('.sb-about');
+    if (ab && window.KYOTSU && window.KYOTSU.open) { ab.style.display = ''; ab.onclick = function () { close(); window.KYOTSU.open(); }; }
+  }
+  function close() { back.classList.remove('sb-open'); document.removeEventListener('keydown', onKey); if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+  function onKey(e) { if (e.key === 'Escape') close(); }
+  window.__sbOpen = open;
+  btn.addEventListener('click', open);
+  var fo = document.querySelector('.sb-fopen'); if (fo) fo.addEventListener('click', open);
+  modal.querySelector('.sb-close').addEventListener('click', close);
+  back.addEventListener('click', function (e) { if (e.target === back) close(); });
+  // 画像：押すと大きく表示し、「この画像を保存」で初めて保存（いきなりダウンロードしない）
+  var view = el('div', 'sb-view'); view.innerHTML = '<div class="sb-vbox"><img alt=""><p class="sb-vl"></p><p class="sb-vn">保存すると、端末のダウンロード先に入ります。</p><div class="sb-acts"><a class="sb-a sb-vsave" href="#" download>この画像を保存</a><button class="sb-a sb-2 sb-vclose" type="button">閉じる</button></div></div>';
+  document.body.appendChild(view);
+  function showImg(im) { view.querySelector('img').src = im.src; view.querySelector('.sb-vl').textContent = im.label || ''; var a = view.querySelector('.sb-vsave'); a.href = im.src; a.setAttribute('download', (im.src.split('/').pop() || 'image.png')); view.classList.add('sb-open'); }
+  function hideImg() { view.classList.remove('sb-open'); }
+  view.querySelector('.sb-vclose').addEventListener('click', hideImg);
+  view.addEventListener('click', function (e) { if (e.target === view) hideImg(); });
+  modal.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('.sb-im'); if (!a) return; e.preventDefault(); var im = IMGS[parseInt(a.getAttribute('data-i'), 10)]; if (im) showImg(im); });
+  // zip：押すと確認を出してから保存
+  var kb = modal.querySelector('.sb-kit');
+  if (kb) kb.addEventListener('click', function () {
+    if (modal.querySelector('.sb-confirm')) return;
+    var c = el('div', 'sb-confirm'); c.innerHTML = 'ロゴ・Xカード・サムネ・小物をまとめた zip を保存します（数MB）。よろしいですか？<div class="sb-acts"><a class="sb-a" href="' + esc(cfg.kit) + '" download>保存する</a><button class="sb-a sb-2 sb-cno" type="button">やめる</button></div>';
+    kb.parentNode.insertBefore(c, kb.nextSibling);
+    c.querySelector('.sb-cno').addEventListener('click', function () { c.parentNode.removeChild(c); });
+    c.querySelector('a').addEventListener('click', function () { setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 300); });
+  });
+  var cp = modal.querySelector('.sb-copy');
+  cp.addEventListener('click', function () {
+    var done = function () { cp.textContent = 'コピーしました'; setTimeout(function () { cp.textContent = 'ゲームのURLをコピー'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(cfg.url).then(done, function () { window.prompt('このURLをコピーしてください', cfg.url); }); }
+    else { window.prompt('このURLをコピーしてください', cfg.url); }
+  });
+})();
+
+</script>
+<!-- KYOTSU:END -->
+</body>
+</html>
